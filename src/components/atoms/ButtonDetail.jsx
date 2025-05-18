@@ -7,7 +7,7 @@ const ButtonDetail = ({ id }) => {
   return (
     <button
       onClick={() => navigate(`/film/${id}`)}
-      className="bg-blue-500 text-white px-2 py-1 rounded"
+      className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-md transition"
     >
       Detail
     </button>

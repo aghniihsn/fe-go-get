@@ -19,18 +19,19 @@ const FilmDetail = () => {
   if (!film) return <div>Loading...</div>;
 
   return (
-    <div className="p-4">
+    <div className="p-6 max-w-5xl mx-auto bg-white rounded-xl shadow-md">
       <FilmInfo film={film} />
-      <h3 className="text-xl font-semibold mt-6 mb-2">Jadwal Tayang</h3>
+      <h3 className="text-2xl font-bold mt-8 mb-4 text-blue-700">Jadwal Tayang</h3>
       <JadwalTable jadwals={jadwals} onBook={setSelectedJadwal} />
       {selectedJadwal && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Form Booking</h3>
+        // <div className="mt-8 bg-gray-50 p-4 rounded-lg shadow-inner">
+        //   <h3 className="text-xl font-semibold mb-4 text-blue-600">Form Booking</h3>
           <BookForm jadwal={selectedJadwal} film={film} />
-        </div>
+        // </div>
       )}
     </div>
   );
+
 };
 
 export default FilmDetail;

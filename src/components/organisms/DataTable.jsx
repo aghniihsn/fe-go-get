@@ -12,21 +12,21 @@ const DataTable = () => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="table-auto w-full text-left border">
-        <thead className="bg-gray-200">
+      <table className="min-w-full text-sm text-gray-700 border rounded-xl shadow">
+        <thead className="bg-blue-500 text-white">
           <tr>
-            <th className="px-4 py-2">ID</th>
-            <th className="px-4 py-2">Nama</th>
-            <th className="px-4 py-2">Kategori</th>
-            <th className="px-4 py-2">Deskripsi</th>
-            <th className="px-4 py-2">Tanggal Dibuat</th>
-            <th className="px-4 py-2">Status</th>
+            {/* <th className="px-4 py-2 text-left">ID</th> */}
+            <th className="px-4 py-2 text-left">Nama</th>
+            <th className="px-4 py-2 text-left">Kategori</th>
+            <th className="px-4 py-2 text-left">Deskripsi</th>
+            <th className="px-4 py-2 text-left">Tanggal Dibuat</th>
+            <th className="px-4 py-2 text-left">Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="bg-white">
           {films.map((film) => (
-            <tr key={film.id} className="border-t">
-              <td className="px-4 py-2">{film.id}</td>
+            <tr key={film.id} className="hover:bg-gray-50 border-b">
+              {/* <td className="px-4 py-2">{film.id}</td> */}
               <td className="px-4 py-2">{film.nama}</td>
               <td className="px-4 py-2">{film.kategori}</td>
               <td className="px-4 py-2">{film.deskripsi}</td>

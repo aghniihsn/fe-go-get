@@ -14,6 +14,19 @@ const BookForm = ({ jadwal }) => {
   const [totalHarga, setTotalHarga] = useState(jadwal.harga);
 
   useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      axios.get(`/users/${userId}`).then((res) => {
+        setForm((prev) => ({
+          ...prev,
+          nama: res.data.nama,
+          email: res.data.email,
+        }));
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     setTotalHarga(form.jumlah * jadwal.harga);
   }, [form.jumlah, jadwal.harga]);
 
@@ -51,15 +64,15 @@ const BookForm = ({ jadwal }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="border p-4 mt-4 rounded-xl shadow-sm bg-white space-y-4"
+      className="p-6 mt-6 bg-white rounded-xl shadow-md space-y-5 border border-blue-100"
     >
-      <h4 className="text-lg font-semibold">Form Pemesanan</h4>
+      <h4 className="text-xl font-semibold text-blue-800">Form Pemesanan</h4>
       <Input
         label="Nama"
         name="nama"
         value={form.nama}
         onChange={handleChange}
-        required
+        disabled
       />
       <Input
         label="Email"
@@ -67,7 +80,7 @@ const BookForm = ({ jadwal }) => {
         type="email"
         value={form.email}
         onChange={handleChange}
-        required
+        disabled
       />
       <Input
         label="Jumlah Tiket"
@@ -78,10 +91,24 @@ const BookForm = ({ jadwal }) => {
         min={1}
         required
       />
-      <div className="text-gray-700 font-medium">
+      <div className="text-blue-700 font-semibold">
         Total Harga: Rp {totalHarga.toLocaleString()}
       </div>
-      <Button type="submit">Pesan Tiket</Button>
+      <div className="flex gap-4 pt-2">
+        <Button
+          type="submit"
+          className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          Pesan Tiket
+        </Button>
+        <Button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="w-1/2 border !text-gray-800 bg-white hover:bg-red-400 hover:!text-white"
+        >
+          Batal
+        </Button>
+      </div>
     </form>
   );
 };

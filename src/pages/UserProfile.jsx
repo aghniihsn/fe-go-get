@@ -1,16 +1,28 @@
 import React, { useEffect, useState } from "react";
-import Input from "../components/atoms/Input";
 import axios from "../services/api";
-import Button from "../components/atoms/Button";
+import {
+  Card,
+  CardBody,
+  Input,
+  Button,
+  Typography,
+  Spinner,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+} from "@material-tailwind/react";
 
 const UserProfile = () => {
   const [form, setForm] = useState({ nama: "", email: "" });
   const [loading, setLoading] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
   const userId = localStorage.getItem("user_id");
 
   useEffect(() => {
-    axios.get(`/users/${userId}`)
-      .then(res => {
+    axios
+      .get(`/users/${userId}`)
+      .then((res) => {
         setForm(res.data);
         setLoading(false);
       })
@@ -22,25 +34,63 @@ const UserProfile = () => {
   };
 
   const handleSubmit = (e) => {
-  e.preventDefault();
-  axios.put(`/users/${userId}`, form)
-    .then(() => {
-      alert("Profil berhasil diupdate");
-      window.location.href = "/"; // redirect ke dashboard
-    })
-    .catch(() => alert("Gagal update"));
-};
+    e.preventDefault();
+    axios
+      .put(`/users/${userId}`, form)
+      .then(() => setOpenDialog(true))
+      .catch(() => alert("Gagal update"));
+  };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Spinner className="h-6 w-6" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h2 className="text-xl font-semibold mb-4">Profil Pengguna</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input label="Nama" name="nama" value={form.nama} onChange={handleChange} />
-        <Input label="Email" name="email" value={form.email} onChange={handleChange} />
-        <Button type="submit" className="mt-2">Simpan</Button>
-      </form>
+      <Card>
+        <CardBody>
+          <Typography variant="h5" className="mb-4">
+            Profil Pengguna
+          </Typography>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Nama"
+              name="nama"
+              value={form.nama}
+              onChange={handleChange}
+            />
+            <Input
+              label="Email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+            />
+            <Button type="submit" color="blue">
+              Simpan
+            </Button>
+          </form>
+        </CardBody>
+      </Card>
+
+      <Dialog open={openDialog} handler={() => setOpenDialog(false)}>
+        <DialogHeader>Berhasil</DialogHeader>
+        <DialogBody>Profil berhasil diperbarui.</DialogBody>
+        <DialogFooter>
+          <Button
+            color="green"
+            onClick={() => {
+              setOpenDialog(false);
+              window.location.href = "/";
+            }}
+          >
+            OK
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 };
