@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Button from "../components/atoms/Button";
 
 const PaymentPage = () => {
   const navigate = useNavigate();
@@ -12,13 +13,13 @@ const PaymentPage = () => {
         <p>Nama: {nama}</p>
         <p>Jumlah Tiket: {jumlah}</p>
         <p className="text-lg font-bold">Total Harga: Rp {totalHarga?.toLocaleString()}</p>
-        <button onClick={() => { 
+        <Button onClick={() => { 
             alert("Pembayaran berhasil!"); 
             navigate("/pesanan");
         }}
         className="bg-green-500 text-white px-4 py-2 rounded">
             Bayar Sekarang
-        </button>    
+        </Button>    
     </div>
   );
 };

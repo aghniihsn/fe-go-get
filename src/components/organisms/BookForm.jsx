@@ -30,6 +30,7 @@ const BookForm = ({ jadwal }) => {
         nama: form.nama,
         email: form.email,
         jumlah: parseInt(form.jumlah),
+        user_id: localStorage.getItem("user_id"), // <-- Tambahkan ini
       };
 
       const res = await axios.post("/tikets", payload);
@@ -45,6 +46,7 @@ const BookForm = ({ jadwal }) => {
       alert("Gagal memesan tiket.");
     }
   };
+
 
   return (
     <form

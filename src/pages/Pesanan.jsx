@@ -5,10 +5,23 @@ const PesananPage = () => {
   const [pesanan, setPesanan] = useState([]);
 
   useEffect(() => {
-    axios.get("/tikets")
+    fetchPesanan();
+  }, []);
+
+  const fetchPesanan = () => {
+    const userId = localStorage.getItem("user_id");
+    axios.get(`/tikets/user/${userId}`)
       .then((res) => setPesanan(res.data))
       .catch((err) => console.error(err));
-  }, []);
+  };
+
+  const handleDelete = (id) => {
+    if (confirm("Yakin ingin hapus tiket ini?")) {
+      axios.delete(`/tikets/${id}`)
+        .then(() => fetchPesanan())
+        .catch(() => alert("Gagal hapus tiket"));
+    }
+  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -20,6 +33,12 @@ const PesananPage = () => {
             <p><strong>Email:</strong> {item.email}</p>
             <p><strong>Jumlah Tiket:</strong> {item.jumlah}</p>
             <p><strong>Total Harga:</strong> Rp {item.total_harga.toLocaleString()}</p>
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="mt-2 text-red-600 underline"
+            >
+              Hapus
+            </button>
           </div>
         ))}
       </div>
