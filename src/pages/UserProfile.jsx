@@ -81,7 +81,7 @@ const UserProfile = () => {
         <DialogBody>Profil berhasil diperbarui.</DialogBody>
         <DialogFooter>
           <Button
-            color="green"
+            color="blue"
             onClick={() => {
               setOpenDialog(false);
               window.location.href = "/";
