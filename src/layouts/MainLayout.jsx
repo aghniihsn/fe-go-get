@@ -3,13 +3,13 @@ import Navbar from "../components/molecules/Navbar";
 
 const MainLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <header className="mb-6">
-          {/* <h1 className="text-3xl font-bold text-gray-800">🎟 GoGet Dashboard</h1> */}
+      <div className="flex-1 w-full">
+        <header className="">
+          {/* <h1 className="text-4xl font-extrabold text-blue-700 drop-shadow-lg">🎟 GoGet Dashboard</h1> */}
         </header>
-        <main className="bg-white p-6 rounded-xl shadow-lg">{children}</main>
+        <main>{children}</main>
       </div>
     </div>
   );
