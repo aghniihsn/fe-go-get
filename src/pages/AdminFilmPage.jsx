@@ -19,7 +19,7 @@ export default function AdminFilmPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">List Film</h2>
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-200 text-black px-4 py-2 rounded-xl hover:bg-blue-400"
             onClick={() => navigate("/admin/create")}
           >
             Create Film

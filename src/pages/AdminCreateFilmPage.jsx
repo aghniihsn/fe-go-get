@@ -5,16 +5,27 @@ import Button from "../components/atoms/Button";
 import AdminSidebar from "../components/organisms/AdminSidebar";
 
 export default function AdminCreateFilmPage() {
-  const [form, setForm] = useState({ title: "", genre: "", duration: "", category: "", poster: "" });
+  const [form, setForm] = useState({ title: "", genre: "", duration: "", category: "", poster: "", posterFile: null });
+  const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    setForm({ ...form, posterFile: file });
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setPreview(null);
+    }
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
-    // Simpan ke backend di sini
+    // Simpan ke backend di sini (gunakan form.posterFile untuk file gambar)
     // Setelah berhasil, kembali ke halaman list film
     navigate("/admin/film");
   }
@@ -53,12 +64,22 @@ export default function AdminCreateFilmPage() {
             value={form.category}
             onChange={handleChange}
           />
-          <Input
-            label="URL Poster"
-            name="poster"
-            value={form.poster}
-            onChange={handleChange}
-          />
+          <div>
+            <label className="block mb-1 font-medium">Poster Film</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-700 border border-gray-300 rounded cursor-pointer"
+            />
+            {preview && (
+              <img
+                src={preview}
+                alt="Preview Poster"
+                className="mt-2 rounded shadow w-full max-h-56 object-contain"
+              />
+            )}
+          </div>
           <Button type="submit" className="w-full">
             Save
           </Button>

@@ -48,13 +48,10 @@ const Navbar = () => {
             <Link to="/pesanan" className="hover:text-blue-500 transition">Pesanan</Link>
           </>
         )}
-        {!isLoggedIn() && (
-          <Link to="/login" className="hover:text-blue-500 transition">Login</Link>
-        )}
       </div>
-      {/* Right: Profile Dropdown */}
+      {/* Right: Profile Dropdown / Login */}
       <div className="flex-1 flex justify-end items-center">
-        {isLoggedIn() && (
+        {isLoggedIn() ? (
           <div className="relative" ref={dropdownRef}>
             <button
               className="hover:text-blue-500 transition font-semibold px-4 py-2 rounded-full bg-blue-100"
@@ -74,6 +71,10 @@ const Navbar = () => {
               </div>
             )}
           </div>
+        ) : (
+          <Link to="/login" className="hover:text-blue-500 transition font-semibold px-4 py-2 rounded-xl bg-blue-100">
+            Login
+          </Link>
         )}
       </div>
     </nav>
