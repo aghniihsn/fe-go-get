@@ -1,11 +1,12 @@
-import React from "react";
-
 const FilmInfo = ({ film }) => (
-  <div className="bg-blue-50 p-6 rounded-lg shadow mb-6">
-    <h2 className="text-3xl font-bold text-blue-800 mb-2">{film.title}</h2>
-    <p className="text-gray-700 mb-1"><strong>Genre:</strong> {film.genre}</p>
-    <p className="text-gray-700"><strong>Durasi:</strong> {film.duration} menit</p>
+  <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <h2 className="text-2xl font-bold text-gray-900 mb-2">{film.title}</h2>
+    <div className="flex items-center space-x-4 text-sm text-gray-600">
+      <span>Genre: {film.genre}</span>
+      <span>•</span>
+      <span>Duration: {film.duration} minutes</span>
+    </div>
   </div>
-);
+)
 
-export default FilmInfo;
+export default FilmInfo

@@ -1,32 +1,36 @@
-import React from "react";
-import Button from "../atoms/Button";
+"use client"
+
+import Button from "../atoms/Button"
 
 const JadwalTable = ({ jadwals, onBook }) => (
-  <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-    <thead className="bg-blue-100 text-blue-900">
-      <tr>
-        <th className="px-4 py-2 text-left">Tanggal</th>
-        <th className="px-4 py-2 text-left">Waktu</th>
-        <th className="px-4 py-2 text-left">Ruangan</th>
-        <th className="px-4 py-2 text-left">Harga</th>
-        <th className="px-4 py-2 text-left">Aksi</th>
-      </tr>
-    </thead>
-    <tbody>
-      {jadwals.map((j) => (
-        <tr key={j.id} className="hover:bg-blue-50">
-          <td className="px-4 py-2 border-t">{j.tanggal}</td>
-          <td className="px-4 py-2 border-t">{j.waktu}</td>
-          <td className="px-4 py-2 border-t">{j.ruangan}</td>
-          <td className="px-4 py-2 border-t">Rp{j.harga}</td>
-          <td className="px-4 py-2 border-t">
-            <Button onClick={() => onBook(j)}>Book Tiket</Button>
-          </td>
+  <div className="overflow-x-auto">
+    <table className="min-w-full">
+      <thead>
+        <tr className="border-b border-gray-200">
+          <th className="text-left py-3 px-4 font-medium text-gray-900">Date</th>
+          <th className="text-left py-3 px-4 font-medium text-gray-900">Time</th>
+          <th className="text-left py-3 px-4 font-medium text-gray-900">Theater</th>
+          <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
+          <th className="text-left py-3 px-4 font-medium text-gray-900">Action</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {jadwals.map((j) => (
+          <tr key={j.id} className="border-b border-gray-100 hover:bg-gray-50">
+            <td className="py-3 px-4 text-gray-700">{j.tanggal}</td>
+            <td className="py-3 px-4 text-gray-700">{j.waktu}</td>
+            <td className="py-3 px-4 text-gray-700">{j.ruangan}</td>
+            <td className="py-3 px-4 text-gray-700">Rp{j.harga?.toLocaleString()}</td>
+            <td className="py-3 px-4">
+              <Button onClick={() => onBook(j)} className="text-sm">
+                Book Now
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)
 
-);
-
-export default JadwalTable;
+export default JadwalTable

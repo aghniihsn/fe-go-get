@@ -1,66 +1,101 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Input from "../components/atoms/Input";
-import Button from "../components/atoms/Button";
-import axios from "../services/api";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import Input from "../components/atoms/Input"
+import Button from "../components/atoms/Button"
+import axios from "../services/api"
 
 const Login = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" })
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+    setForm({ ...form, [e.target.name]: e.target.value })
+    if (error) setError("")
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
     if (!form.email || !form.password) {
-      setError("Email dan password wajib diisi.");
-      return;
+      setError("Please fill in all fields")
+      setLoading(false)
+      return
     }
+
     try {
-      // Login ke backend, dapatkan user & role & token
-      const res = await axios.post("/auth/login", form);
-      const { id, role, nama, token } = res.data;
-      localStorage.setItem("user_id", id);
-      localStorage.setItem("user_role", role);
-      localStorage.setItem("user_nama", nama);
-      localStorage.setItem("jwt_token", token);
+      const res = await axios.post("/auth/login", form)
+      const { id, role, nama, token } = res.data
+      localStorage.setItem("user_id", id)
+      localStorage.setItem("user_role", role)
+      localStorage.setItem("user_nama", nama)
+      localStorage.setItem("jwt_token", token)
+
       if (role === "admin") {
-        navigate("/admin");
+        navigate("/admin")
       } else {
-        navigate("/");
+        navigate("/")
       }
     } catch {
-      setError("Email atau password salah.");
+      setError("Invalid email or password")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{
-        backgroundImage: 'url(/public/bg-login.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <div className="w-full max-w-md p-8 rounded-2xl shadow-2xl backdrop-blur-md bg-white/30 border border-white/40">
-        <h2 className="text-3xl font-bold mb-6 text-center text-white drop-shadow">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
-          <Input label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
-          {error && <div className="text-red-400 text-sm">{error}</div>}
-          <Button type="submit" className="w-full">Login</Button>
-        </form>
-        <div className="mt-4 text-center text-white">
-          Belum punya akun? <span className="text-blue-300 cursor-pointer underline" onClick={() => navigate("/register")}>Register</span>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
+          <p className="text-gray-600">Sign in to your account</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+            />
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+            />
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">{error}</div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign in"}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <button onClick={() => navigate("/register")} className="text-gray-900 font-medium hover:underline">
+                Sign up
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

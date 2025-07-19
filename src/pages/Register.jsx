@@ -1,58 +1,98 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Input from "../components/atoms/Input";
-import Button from "../components/atoms/Button";
-import axios from "../services/api";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import Input from "../components/atoms/Input"
+import Button from "../components/atoms/Button"
+import axios from "../services/api"
 
 const Register = () => {
-  const [form, setForm] = useState({ nama: "", email: "", password: "", role: "user" });
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const [form, setForm] = useState({ nama: "", email: "", password: "", role: "user" })
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+    setForm({ ...form, [e.target.name]: e.target.value })
+    if (error) setError("")
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
     if (!form.nama || !form.email || !form.password) {
-      setError("Semua field wajib diisi.");
-      return;
+      setError("Please fill in all fields")
+      setLoading(false)
+      return
     }
+
     try {
-      // Register ke backend
-      await axios.post("/auth/register", form);
-      navigate("/login");
+      await axios.post("/auth/register", form)
+      navigate("/login")
     } catch {
-      setError("Registrasi gagal. Email mungkin sudah digunakan.");
+      setError("Registration failed. Email may already be in use.")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{
-        backgroundImage: 'url(/public/bg-login.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <div className="w-full max-w-md p-8 rounded-2xl shadow-2xl backdrop-blur-md bg-white/30 border border-white/40">
-        <h2 className="text-3xl font-bold mb-6 text-center text-white drop-shadow">Register</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Nama" name="nama" value={form.nama} onChange={handleChange} />
-          <Input label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
-          <Input label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
-          {error && <div className="text-red-400 text-sm">{error}</div>}
-          <Button type="submit" className="w-full">Register</Button>
-        </form>
-        <div className="mt-4 text-center text-white">
-          Sudah punya akun? <span className="text-blue-300 cursor-pointer underline" onClick={() => navigate("/login")}>Login</span>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Create account</h1>
+          <p className="text-gray-600">Sign up to get started</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Full Name"
+              name="nama"
+              value={form.nama}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+            />
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+            />
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Create a password"
+            />
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">{error}</div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Creating account..." : "Create account"}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <button onClick={() => navigate("/login")} className="text-gray-900 font-medium hover:underline">
+                Sign in
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

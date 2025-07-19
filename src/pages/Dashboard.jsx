@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Typography } from "@material-tailwind/react";
-import API from "../services/api";
-import { useNavigate } from "react-router-dom";
+"use client"
+
+import { useEffect, useState } from "react"
+import API from "../services/api"
+import { useNavigate } from "react-router-dom"
 
 const Dashboard = () => {
-  const [films, setFilms] = useState([]);
-  const navigate = useNavigate();
+  const [films, setFilms] = useState([])
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   const posterMap = {
     "The Silent Wave": "/posters/1.jpg",
@@ -17,42 +19,70 @@ const Dashboard = () => {
     "Mystery Code": "/posters/7.jpg",
     "Wings of Glory": "/posters/8.jpg",
     "Pixel Dreams": "/posters/9.png",
-    "Echoes": "/posters/10.jpg",
-  };
+    Echoes: "/posters/10.jpg",
+  }
 
   useEffect(() => {
     API.get("/films")
-      .then((res) => setFilms(res.data))
-      .catch((err) => console.error(err));
-  }, []);
+      .then((res) => {
+        setFilms(res.data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-900 border-t-transparent"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <Typography variant="h4" className="mb-6 text-center">🎬 Daftar Film</Typography>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {films.map((film) => (
-          <div key={film.id} className="bg-white rounded-xl shadow-md overflow-hidden">
-            <img
-              src={posterMap[film.title] || "/posters/default.jpg"}
-              alt={film.title}
-              className="w-full h-64 object-cover"
-            />
-            <div className="p-4 space-y-1">
-              <h3 className="text-lg font-bold">{film.title}</h3>
-              <p className="text-gray-600">Genre: {film.genre}</p>
-              <p className="text-gray-600">Durasi: {film.duration} menit</p>
-              <button
-                onClick={() => navigate(`/film/${film.id}`)}
-                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                Detail
-              </button>
+    <div className="min-h-screen bg-gray-50 pt-20 pb-12">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Now Playing</h1>
+          <p className="text-gray-600">Discover the latest movies in theaters</p>
+        </div>
+
+        {/* Movies Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {films.map((film) => (
+            <div
+              key={film.id}
+              className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="aspect-[3/4] relative">
+                <img
+                  src={posterMap[film.title] || "/posters/default.jpg"}
+                  alt={film.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-1">{film.title}</h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  {film.genre} • {film.duration}min
+                </p>
+                <button
+                  onClick={() => navigate(`/film/${film.id}`)}
+                  className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                >
+                  View Details
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard
