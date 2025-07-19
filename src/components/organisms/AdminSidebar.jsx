@@ -7,7 +7,7 @@ const menu = [
   { label: "Dashboard", path: "/admin" },
   { label: "Film", path: "/admin/film" },
   { label: "Jadwal", path: "/admin/jadwal" },
-  { label: "Tiket", path: "/admin/tiket" },
+  // { label: "Tiket", path: "/admin/tiket" },
   { label: "Pesanan", path: "/admin/pesanan" },
 ]
 

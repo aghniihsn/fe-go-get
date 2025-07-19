@@ -49,8 +49,8 @@ export default function AdminCreateFilmPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <div className="flex-1 md:ml-64 pt-16">
-        <div className="p-6">
+      <div className="flex-1 md:ml-64 pt-16 flex items-center justify-center">
+        <div className="p-6 w-full max-w-2xl">
           {/* Header */}
           <div className="flex items-center space-x-4 mb-8">
             <button
@@ -129,14 +129,6 @@ export default function AdminCreateFilmPage() {
                       ))}
                     </select>
                   </div>
-
-                  <Input
-                    label="Director"
-                    name="director"
-                    value={form.director}
-                    onChange={handleChange}
-                    placeholder="Director name"
-                  />
 
                   <div className="space-y-1">
                     <label className="block text-sm font-medium text-gray-700">Description</label>

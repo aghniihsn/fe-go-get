@@ -14,8 +14,8 @@ import AdminCreateFilmPage from "./pages/AdminCreateFilmPage";
 import { isLoggedIn, getUserRole } from "./utils/auth";
 import AdminJadwalPage from "./pages/AdminJadwalPage";
 import AdminCreateJadwalPage from "./pages/AdminCreateJadwalPage";
-import AdminTiketPage from "./pages/AdminTiketPage";
-import AdminCreateTiketPage from "./pages/AdminCreateTiketPage";
+// import AdminTiketPage from "./pages/AdminTiketPage";
+// import AdminCreateTiketPage from "./pages/AdminCreateTiketPage";
 import AdminPesananPage from "./pages/AdminPesananPage";
 
 // Komponen proteksi route
@@ -75,7 +75,7 @@ export default function App() {
             </MainLayout>
           }
         />
-        <Route
+        {/* <Route
           path="/admin/tiket"
           element={
             <MainLayout>
@@ -90,7 +90,7 @@ export default function App() {
               <AdminCreateTiketPage />
             </MainLayout>
           }
-        />
+        /> */}
         <Route
           path="/admin/pesanan"
           element={

@@ -9,7 +9,6 @@ const JadwalTable = ({ jadwals, onBook }) => (
         <tr className="border-b border-gray-200">
           <th className="text-left py-3 px-4 font-medium text-gray-900">Date</th>
           <th className="text-left py-3 px-4 font-medium text-gray-900">Time</th>
-          <th className="text-left py-3 px-4 font-medium text-gray-900">Theater</th>
           <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
           <th className="text-left py-3 px-4 font-medium text-gray-900">Action</th>
         </tr>

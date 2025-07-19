@@ -59,8 +59,8 @@ export default function AdminCreateJadwalPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <div className="flex-1 md:ml-64 pt-16">
-        <div className="p-6">
+      <div className="flex-1 md:ml-64 pt-16 flex items-center justify-center">
+        <div className="p-6 w-full max-w-2xl">
           {/* Header */}
           <div className="flex items-center space-x-4 mb-8">
             <button
@@ -131,24 +131,6 @@ export default function AdminCreateJadwalPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Studio</label>
-                    <select
-                      name="studio"
-                      value={form.studio}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    >
-                      <option value="">Choose studio</option>
-                      {studioOptions.map((studio) => (
-                        <option key={studio.value} value={studio.value}>
-                          {studio.label} - {studio.type} (Capacity: {studio.capacity})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       label="Ticket Price (Rp)"
@@ -158,17 +140,6 @@ export default function AdminCreateJadwalPage() {
                       type="number"
                       placeholder="50000"
                       required
-                    />
-
-                    <Input
-                      label="Capacity"
-                      name="kapasitas"
-                      value={form.kapasitas}
-                      onChange={handleChange}
-                      type="number"
-                      placeholder="150"
-                      required
-                      disabled={!!form.studio}
                     />
                   </div>
                 </div>

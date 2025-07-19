@@ -8,10 +8,10 @@ import { useNavigate } from "react-router-dom"
 const AdminJadwalPage = () => {
   const navigate = useNavigate()
   const [jadwalList] = useState([
-    { id: 1, film: "The Silent Wave", tanggal: "2025-07-20", jam: "19:00", studio: "Studio 1", harga: 50000 },
-    { id: 2, film: "Galactic Quest", tanggal: "2025-07-21", jam: "20:00", studio: "Studio 2", harga: 75000 },
-    { id: 3, film: "Haunted Hollow", tanggal: "2025-07-22", jam: "15:00", studio: "Studio 3", harga: 45000 },
-    { id: 4, film: "Laugh Factory", tanggal: "2025-07-23", jam: "17:30", studio: "Studio 1", harga: 50000 },
+    { id: 1, film: "The Silent Wave", tanggal: "2025-07-20", jam: "19:00", harga: 50000 },
+    { id: 2, film: "Galactic Quest", tanggal: "2025-07-21", jam: "20:00", harga: 75000 },
+    { id: 3, film: "Haunted Hollow", tanggal: "2025-07-22", jam: "15:00", harga: 45000 },
+    { id: 4, film: "Laugh Factory", tanggal: "2025-07-23", jam: "17:30", harga: 50000 },
   ])
 
   return (
@@ -36,7 +36,6 @@ const AdminJadwalPage = () => {
                 <div className="space-y-1 text-sm text-gray-600 mb-4">
                   <p>Date: {jadwal.tanggal}</p>
                   <p>Time: {jadwal.jam}</p>
-                  <p>Studio: {jadwal.studio}</p>
                   <p className="font-medium text-gray-900">Price: Rp {jadwal.harga.toLocaleString()}</p>
                 </div>
                 <div className="flex gap-2">
