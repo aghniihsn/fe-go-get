@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom"
 
 const AdminJadwalPage = () => {
   const navigate = useNavigate()
-  const [jadwalList] = useState([
+  const [jadwalList, setJadwalList] = useState([
     { id: 1, film: "The Silent Wave", tanggal: "2025-07-20", jam: "19:00", harga: 50000 },
     { id: 2, film: "Galactic Quest", tanggal: "2025-07-21", jam: "20:00", harga: 75000 },
     { id: 3, film: "Haunted Hollow", tanggal: "2025-07-22", jam: "15:00", harga: 45000 },
     { id: 4, film: "Laugh Factory", tanggal: "2025-07-23", jam: "17:30", harga: 50000 },
   ])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedJadwalId, setSelectedJadwalId] = useState(null)
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -42,7 +44,7 @@ const AdminJadwalPage = () => {
                   <Button variant="secondary" className="flex-1 text-sm">
                     Edit
                   </Button>
-                  <Button variant="danger" className="text-sm">
+                  <Button variant="danger" className="text-sm" onClick={() => {setSelectedJadwalId(jadwal.id); setShowDeleteModal(true);}}>
                     Delete
                   </Button>
                 </div>
@@ -54,6 +56,26 @@ const AdminJadwalPage = () => {
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">No schedules found</p>
               <Button onClick={() => navigate("/admin/jadwal/create")}>Create Your First Schedule</Button>
+            </div>
+          )}
+
+          {/* Delete Modal */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Schedule?</h3>
+                <p className="text-gray-600 mb-4">
+                  Are you sure you want to delete this schedule? This action cannot be undone.
+                </p>
+                <div className="flex gap-3">
+                  <Button variant="danger" onClick={() => {setJadwalList(jadwalList.filter(j => j.id !== selectedJadwalId)); setShowDeleteModal(false); setSelectedJadwalId(null);}} className="flex-1">
+                    Yes, Delete
+                  </Button>
+                  <Button variant="secondary" onClick={() => setShowDeleteModal(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>

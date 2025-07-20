@@ -36,11 +36,24 @@ const initialFilms = [
 ]
 
 export default function AdminFilmPage() {
-  const [films] = useState(initialFilms)
+  const [films, setFilms] = useState(initialFilms)
   const [searchTerm, setSearchTerm] = useState("")
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedFilmId, setSelectedFilmId] = useState(null)
   const navigate = useNavigate()
 
   const filteredFilms = films.filter((film) => film.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  const handleDeleteClick = (id) => {
+    setSelectedFilmId(id)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = () => {
+    setFilms(films.filter((film) => film.id !== selectedFilmId))
+    setShowDeleteModal(false)
+    setSelectedFilmId(null)
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -84,13 +97,13 @@ export default function AdminFilmPage() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-3">
-                    {film.genre} • {film.duration}min • {film.category}
+                    {film.genre}  {film.duration}min  {film.category}
                   </p>
                   <div className="flex gap-2">
                     <Button variant="secondary" className="flex-1 text-sm">
                       Edit
                     </Button>
-                    <Button variant="danger" className="text-sm">
+                    <Button variant="danger" className="text-sm" onClick={() => handleDeleteClick(film.id)}>
                       Delete
                     </Button>
                   </div>
@@ -103,6 +116,26 @@ export default function AdminFilmPage() {
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">No movies found</p>
               <Button onClick={() => navigate("/admin/create")}>Add Your First Movie</Button>
+            </div>
+          )}
+
+          {/* Delete Modal */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Movie?</h3>
+                <p className="text-gray-600 mb-4">
+                  Are you sure you want to delete this movie? This action cannot be undone.
+                </p>
+                <div className="flex gap-3">
+                  <Button variant="danger" onClick={confirmDelete} className="flex-1">
+                    Yes, Delete
+                  </Button>
+                  <Button variant="secondary" onClick={() => setShowDeleteModal(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>

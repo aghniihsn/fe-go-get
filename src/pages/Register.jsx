@@ -22,8 +22,24 @@ const Register = () => {
     setError("")
     setLoading(true)
 
+    // Validasi field kosong
     if (!form.nama || !form.email || !form.password) {
       setError("Please fill in all fields")
+      setLoading(false)
+      return
+    }
+
+    // Validasi format email sederhana
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setError("Invalid email format")
+      setLoading(false)
+      return
+    }
+
+    // Validasi panjang password
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters")
       setLoading(false)
       return
     }

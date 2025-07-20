@@ -8,24 +8,49 @@ import axios from "../services/api"
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" })
-  const [error, setError] = useState("")
+  const [error, setError] = useState({ email: "", password: "", general: "" })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
-    if (error) setError("")
+    // Reset error untuk field yang diubah
+    setError({ ...error, [e.target.name]: "", general: "" })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError("")
+    setError({ email: "", password: "", general: "" })
     setLoading(true)
 
-    if (!form.email || !form.password) {
-      setError("Please fill in all fields")
-      setLoading(false)
-      return
+    let hasError = false;
+    const newError = { email: "", password: "", general: "" };
+
+    // Validasi email
+    if (!form.email) {
+      newError.email = "Email is required";
+      hasError = true;
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email)) {
+        newError.email = "Invalid email format";
+        hasError = true;
+      }
+    }
+
+    // Validasi password
+    if (!form.password) {
+      newError.password = "Password is required";
+      hasError = true;
+    } else if (form.password.length < 6) {
+      newError.password = "Password must be at least 6 characters";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setError(newError);
+      setLoading(false);
+      return;
     }
 
     try {
@@ -42,7 +67,7 @@ const Login = () => {
         navigate("/")
       }
     } catch {
-      setError("Invalid email or password")
+      setError({ ...newError, general: "Invalid email or password" })
     } finally {
       setLoading(false)
     }
@@ -75,8 +100,14 @@ const Login = () => {
               placeholder="Enter your password"
             />
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">{error}</div>
+            {error.email && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-red-700 text-sm">{error.email}</div>
+            )}
+            {error.password && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-red-700 text-sm">{error.password}</div>
+            )}
+            {error.general && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-red-700 text-sm">{error.general}</div>
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 const Dashboard = () => {
   const [films, setFilms] = useState([])
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
   const navigate = useNavigate()
 
   const posterMap = {
@@ -51,9 +52,20 @@ const Dashboard = () => {
           <p className="text-gray-600">Discover the latest movies in theaters</p>
         </div>
 
+        {/* Search */}
+        <div className="mb-8 max-w-md">
+          <input
+            type="text"
+            placeholder="Search movies..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+          />
+        </div>
+
         {/* Movies Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {films.map((film) => (
+          {films.filter(film => film.title.toLowerCase().includes(searchTerm.toLowerCase())).map((film) => (
             <div
               key={film.id}
               className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
