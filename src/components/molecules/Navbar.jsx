@@ -34,7 +34,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <Link to="/" className="text-xl font-bold text-gray-900">
-          GoGet
+          MovieTix
         </Link>
 
         {/* Navigation */}

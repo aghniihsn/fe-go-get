@@ -55,19 +55,25 @@ const Login = () => {
 
     try {
       const res = await axios.post("/auth/login", form)
-      const { id, role, nama, token } = res.data
-      localStorage.setItem("user_id", id)
-      localStorage.setItem("user_role", role)
-      localStorage.setItem("user_nama", nama)
+      const { token, user } = res.data
+      localStorage.setItem("user_id", user._id)
+      localStorage.setItem("user_role", user.role)
+      localStorage.setItem("user_username", user.username)
+      localStorage.setItem("user_email", user.email)
       localStorage.setItem("jwt_token", token)
 
-      if (role === "admin") {
+      if (user.role === "admin") {
         navigate("/admin")
       } else {
         navigate("/")
       }
-    } catch {
-      setError({ ...newError, general: "Invalid email or password" })
+    } catch (err) {
+      console.error("Login error:", err)
+      if (err.response?.data?.error) {
+        setError({ ...newError, general: err.response.data.error })
+      } else {
+        setError({ ...newError, general: "Login failed. Please try again." })
+      }
     } finally {
       setLoading(false)
     }

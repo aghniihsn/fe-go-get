@@ -26,11 +26,12 @@ const Dashboard = () => {
   useEffect(() => {
     API.get("/films")
       .then((res) => {
-        setFilms(res.data)
+        setFilms(res.data || [])
         setLoading(false)
       })
       .catch((err) => {
         console.error(err)
+        setFilms([])
         setLoading(false)
       })
   }, [])
@@ -65,7 +66,9 @@ const Dashboard = () => {
 
         {/* Movies Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {films.filter(film => film.title.toLowerCase().includes(searchTerm.toLowerCase())).map((film) => (
+          {films && films.filter(film => 
+            film?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+          ).map((film) => (
             <div
               key={film.id}
               className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
@@ -92,6 +95,22 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
+
+        {/* No Films Message */}
+        {films && films.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No movies available at the moment.</p>
+          </div>
+        )}
+
+        {/* No Search Results Message */}
+        {films && films.length > 0 && films.filter(film => 
+          film?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+        ).length === 0 && searchTerm && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No movies found matching "{searchTerm}".</p>
+          </div>
+        )}
       </div>
     </div>
   )

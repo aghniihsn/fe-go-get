@@ -38,115 +38,131 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <MainLayout>
-              <AdminDashboard />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminDashboard />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/film"
           element={
-            <MainLayout>
-              <AdminFilmPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminFilmPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/create"
           element={
-            <MainLayout>
-              <AdminCreateFilmPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminCreateFilmPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/jadwal"
           element={
-            <MainLayout>
-              <AdminJadwalPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminJadwalPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/jadwal/create"
           element={
-            <MainLayout>
-              <AdminCreateJadwalPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminCreateJadwalPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         {/* <Route
           path="/admin/tiket"
           element={
-            <MainLayout>
-              <AdminTiketPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminTiketPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/tiket/create"
           element={
-            <MainLayout>
-              <AdminCreateTiketPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminCreateTiketPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         /> */}
         <Route
           path="/admin/pesanan"
           element={
-            <MainLayout>
-              <AdminPesananPage />
-            </MainLayout>
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminPesananPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout>
                 <Dashboard />
               </MainLayout>
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/film/:id"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout>
                 <FilmDetail />
               </MainLayout>
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/pembayaran"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout>
                 <PaymentPage />
               </MainLayout>
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/pesanan"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout>
                 <PesananPage />
               </MainLayout>
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/profil"
           element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout>
                 <UserProfile />
               </MainLayout>
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
       </Routes>

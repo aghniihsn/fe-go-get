@@ -7,7 +7,7 @@ import Button from "../components/atoms/Button"
 import axios from "../services/api"
 
 const Register = () => {
-  const [form, setForm] = useState({ nama: "", email: "", password: "", role: "user" })
+  const [form, setForm] = useState({ username: "", email: "", password: "", role: "user" })
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -23,7 +23,7 @@ const Register = () => {
     setLoading(true)
 
     // Validasi field kosong
-    if (!form.nama || !form.email || !form.password) {
+    if (!form.username || !form.email || !form.password) {
       setError("Please fill in all fields")
       setLoading(false)
       return
@@ -45,10 +45,17 @@ const Register = () => {
     }
 
     try {
-      await axios.post("/auth/register", form)
+      const res = await axios.post("/auth/register", form)
+      console.log("Registration successful:", res.data)
+      alert("Registration successful! Please login.")
       navigate("/login")
-    } catch {
-      setError("Registration failed. Email may already be in use.")
+    } catch (err) {
+      console.error("Registration error:", err)
+      if (err.response?.data?.error) {
+        setError(err.response.data.error)
+      } else {
+        setError("Registration failed. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -65,11 +72,11 @@ const Register = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Full Name"
-              name="nama"
-              value={form.nama}
+              label="Username"
+              name="username"
+              value={form.username}
               onChange={handleChange}
-              placeholder="Enter your full name"
+              placeholder="Enter your username"
             />
             <Input
               label="Email"

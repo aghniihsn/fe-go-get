@@ -7,7 +7,7 @@ const MainLayout = ({ children }) => {
       <Navbar />
       <div className="flex-1 w-full">
         <header className="">
-          {/* <h1 className="text-4xl font-extrabold text-blue-700 drop-shadow-lg">🎟 GoGet Dashboard</h1> */}
+          {/* <h1 className="text-4xl font-extrabold text-blue-700 drop-shadow-lg">🎟 MovieTix Dashboard</h1> */}
         </header>
         <main>{children}</main>
       </div>
