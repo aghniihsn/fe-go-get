@@ -65,6 +65,8 @@ const FilmDetail = () => {
                 <span>{Array.isArray(film.genre) ? film.genre.join(", ") : film.genre}</span>
                 <span>•</span>
                 <span>{film.duration} min</span>
+                <span>•</span>
+                <span className="font-semibold">{film.rating || "N/A"}</span>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 {film.description || "No description available."}

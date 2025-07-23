@@ -7,6 +7,7 @@ import Button from "../components/atoms/Button"
 
 const UserProfile = () => {
   const [form, setForm] = useState({ nama: "", email: "" })
+  const [editName, setEditName] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -29,8 +30,21 @@ const UserProfile = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     setSaving(true)
+    // Pisahkan nama menjadi first_name dan last_name
+    let first_name = ""
+    let last_name = ""
+    if (form.nama) {
+      const parts = form.nama.trim().split(" ")
+      first_name = parts[0]
+      last_name = parts.slice(1).join(" ")
+    }
+    const payload = {
+      first_name,
+      last_name,
+      email: form.email,
+    }
     axios
-      .put(`/users/${userId}`, form)
+      .put(`/users/${userId}`, payload)
       .then(() => {
         setShowSuccess(true)
         setSaving(false)
@@ -61,7 +75,21 @@ const UserProfile = () => {
         {/* Profile Form */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input label="Full Name" name="nama" value={form.nama} onChange={handleChange} required />
+            <div className="flex items-center gap-2">
+              <Input
+                label="Full Name"
+                name="nama"
+                value={form.nama}
+                onChange={handleChange}
+                required
+                disabled={!editName}
+              />
+              {!editName ? (
+                <Button type="button" onClick={() => setEditName(true)} variant="secondary">Edit</Button>
+              ) : (
+                <Button type="button" onClick={() => setEditName(false)} variant="secondary">Cancel</Button>
+              )}
+            </div>
             <Input
               label="Email Address"
               name="email"

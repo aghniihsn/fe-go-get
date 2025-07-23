@@ -8,7 +8,7 @@ const JadwalTable = ({ jadwals, onBook }) => (
       <thead>
         <tr className="border-b border-gray-200">
           <th className="text-left py-3 px-4 font-medium text-gray-900">Date</th>
-          <th className="text-left py-3 px-4 font-medium text-gray-900">Time</th>
+          <th className="text-left py-3 px-4 font-medium text-gray-900">Studio</th>
           <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
           <th className="text-left py-3 px-4 font-medium text-gray-900">Action</th>
         </tr>
@@ -17,7 +17,6 @@ const JadwalTable = ({ jadwals, onBook }) => (
         {jadwals.map((j) => (
           <tr key={j.id} className="border-b border-gray-100 hover:bg-gray-50">
             <td className="py-3 px-4 text-gray-700">{j.tanggal}</td>
-            <td className="py-3 px-4 text-gray-700">{j.waktu}</td>
             <td className="py-3 px-4 text-gray-700">{j.ruangan}</td>
             <td className="py-3 px-4 text-gray-700">Rp{j.harga?.toLocaleString()}</td>
             <td className="py-3 px-4">

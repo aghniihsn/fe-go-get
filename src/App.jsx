@@ -178,7 +178,7 @@ export default function App() {
           }
         />
         <Route
-          path="/profil"
+          path="/profile"
           element={
             <ProtectedRoute>
               <MainLayout>

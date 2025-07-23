@@ -9,7 +9,7 @@ import Input from "../atoms/Input"
 const BookForm = ({ jadwal }) => {
   const navigate = useNavigate()
   const [form, setForm] = useState({
-    nama: "",
+    username: "",
     email: "",
     jumlah: 1,
   })
@@ -22,7 +22,7 @@ const BookForm = ({ jadwal }) => {
       axios.get(`/users/${userId}`).then((res) => {
         setForm((prev) => ({
           ...prev,
-          nama: res.data.nama,
+          username: res.data.username,
           email: res.data.email,
         }))
       })
@@ -44,16 +44,17 @@ const BookForm = ({ jadwal }) => {
       const payload = {
         id: new Date().getTime().toString(),
         jadwal_id: jadwal.id,
-        nama: form.nama,
+        username: form.username,
         email: form.email,
         jumlah: Number.parseInt(form.jumlah),
         user_id: localStorage.getItem("user_id"),
+        kursi: "",
       }
 
       const res = await axios.post("/tikets", payload)
       navigate("/pembayaran", {
         state: {
-          nama: form.nama,
+          username: form.username,
           jumlah: form.jumlah,
           totalHarga: res.data.total_harga,
         },
@@ -68,7 +69,7 @@ const BookForm = ({ jadwal }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Input label="Name" name="nama" value={form.nama} onChange={handleChange} disabled />
+      <Input label="Name" name="username" value={form.username} onChange={handleChange} disabled />
       <Input label="Email" name="email" type="email" value={form.email} onChange={handleChange} disabled />
       <Input
         label="Number of Tickets"
