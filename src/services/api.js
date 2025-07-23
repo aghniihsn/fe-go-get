@@ -13,9 +13,36 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+
 // Create film
 export const createFilm = async (data) => {
   return API.post('/films', data);
 };
+
+// Get all films
+export const getFilms = async () => {
+  return API.get('/films');
+};
+
+// Create jadwal
+export const createJadwal = async (data) => {
+  return API.post('/jadwals', data);
+};
+
+// Get all jadwals
+export const getJadwals = async () => {
+  return API.get('/jadwals');
+};
+
+// Delete jadwal by id
+export const deleteJadwal = async (id) => {
+  return API.delete(`/jadwals/${id}`);
+};
+
+// Update jadwal by id
+export const updateJadwal = async (id, data) => {
+  return API.put(`/jadwals/${id}`, data);
+};
+
 
 export default API;

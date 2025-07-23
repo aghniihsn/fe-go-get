@@ -1,20 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import AdminSidebar from "../components/organisms/AdminSidebar"
 import Button from "../components/atoms/Button"
 import { useNavigate } from "react-router-dom"
 
+import { getJadwals, deleteJadwal } from "../services/api"
+
 const AdminJadwalPage = () => {
   const navigate = useNavigate()
-  const [jadwalList, setJadwalList] = useState([
-    { id: 1, film: "The Silent Wave", tanggal: "2025-07-20", jam: "19:00", harga: 50000 },
-    { id: 2, film: "Galactic Quest", tanggal: "2025-07-21", jam: "20:00", harga: 75000 },
-    { id: 3, film: "Haunted Hollow", tanggal: "2025-07-22", jam: "15:00", harga: 45000 },
-    { id: 4, film: "Laugh Factory", tanggal: "2025-07-23", jam: "17:30", harga: 50000 },
-  ])
+  const [jadwalList, setJadwalList] = useState([])
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedJadwalId, setSelectedJadwalId] = useState(null)
+  const [loadingDelete, setLoadingDelete] = useState(false)
+
+  useEffect(() => {
+    getJadwals().then(res => {
+      setJadwalList(res.data)
+    })
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -32,24 +36,28 @@ const AdminJadwalPage = () => {
 
           {/* Schedules Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {jadwalList.map((jadwal) => (
-              <div key={jadwal.id} className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="font-semibold text-gray-900 mb-2">{jadwal.film}</h3>
+            {jadwalList.map((jadwal) => {
+              // Pastikan id yang dikirim ke backend adalah string ObjectID
+              const jadwalId = typeof jadwal._id === "object" && jadwal._id.$oid ? jadwal._id.$oid : jadwal._id || jadwal.id;
+              return (
+              <div key={jadwalId} className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="font-semibold text-gray-900 mb-2">{jadwal.film_title || jadwal.film || "-"}</h3>
                 <div className="space-y-1 text-sm text-gray-600 mb-4">
                   <p>Date: {jadwal.tanggal}</p>
-                  <p>Time: {jadwal.jam}</p>
-                  <p className="font-medium text-gray-900">Price: Rp {jadwal.harga.toLocaleString()}</p>
+                  <p>Studio: {jadwal.ruangan}</p>
+                  <p className="font-medium text-gray-900">Price: Rp {Number(jadwal.harga).toLocaleString()}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="secondary" className="flex-1 text-sm">
+                  <Button variant="secondary" className="flex-1 text-sm" onClick={() => navigate(`/admin/jadwal/edit/${jadwalId}`)}>
                     Edit
                   </Button>
-                  <Button variant="danger" className="text-sm" onClick={() => {setSelectedJadwalId(jadwal.id); setShowDeleteModal(true);}}>
+                  <Button variant="danger" className="text-sm" onClick={() => {setSelectedJadwalId(jadwalId); setShowDeleteModal(true);}}>
                     Delete
                   </Button>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
 
           {jadwalList.length === 0 && (
@@ -68,8 +76,23 @@ const AdminJadwalPage = () => {
                   Are you sure you want to delete this schedule? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
-                  <Button variant="danger" onClick={() => {setJadwalList(jadwalList.filter(j => j.id !== selectedJadwalId)); setShowDeleteModal(false); setSelectedJadwalId(null);}} className="flex-1">
-                    Yes, Delete
+                  <Button variant="danger" onClick={async () => {
+                    setLoadingDelete(true);
+                    try {
+                      await deleteJadwal(selectedJadwalId);
+                      setJadwalList(jadwalList.filter(j => {
+                        const id = typeof j._id === "object" && j._id?.$oid ? j._id.$oid : j._id || j.id;
+                        return id !== selectedJadwalId;
+                      }));
+                      setShowDeleteModal(false);
+                      setSelectedJadwalId(null);
+                    } catch {
+                      alert("Gagal menghapus jadwal!");
+                    } finally {
+                      setLoadingDelete(false);
+                    }
+                  }} className="flex-1" disabled={loadingDelete}>
+                    {loadingDelete ? "Deleting..." : "Yes, Delete"}
                   </Button>
                   <Button variant="secondary" onClick={() => setShowDeleteModal(false)} className="flex-1">
                     Cancel
