@@ -5,46 +5,59 @@ import { useNavigate } from "react-router-dom"
 import Input from "../components/atoms/Input"
 import Button from "../components/atoms/Button"
 import AdminSidebar from "../components/organisms/AdminSidebar"
+import { createFilm } from "../services/api"
 
 export default function AdminCreateFilmPage() {
   const [form, setForm] = useState({
     title: "",
-    genre: "",
+    genre: "", // string
     duration: "",
-    category: "",
     description: "",
-    director: "",
-    posterFile: null,
+    poster_url: "",
+    rating: "Semua Umur", // default value
   })
-  const [preview, setPreview] = useState(null)
+  // const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const genres = ["Action", "Comedy", "Drama", "Horror", "Romance", "Sci-Fi", "Thriller"]
-  const categories = ["Regular", "IMAX", "4DX", "VIP", "Premium"]
+  const ratings = ["Semua Umur", "Anak-anak", "Remaja", "Dewasa"]
+
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
   }
 
-  function handleFileChange(e) {
-    const file = e.target.files[0]
-    setForm({ ...form, posterFile: file })
-    if (file) {
-      setPreview(URL.createObjectURL(file))
-    } else {
-      setPreview(null)
+
+
+  async function handleSubmit(e) {
+  e.preventDefault()
+  setLoading(true)
+  // Validasi durasi
+  const durationNum = Number(form.duration)
+  if (!durationNum || durationNum < 1) {
+    alert("Durasi harus berupa angka dan lebih dari 0.")
+    setLoading(false)
+    return;
+  }
+  try {
+    const payload = {
+      title: form.title,
+      genre: form.genre ? [form.genre] : [],
+      duration: durationNum,
+      description: form.description,
+      poster_url: form.poster_url,
+      rating: form.rating,
     }
+    await createFilm(payload)
+    setLoading(false)
+    navigate("/admin/film")
+  } catch {
+    setLoading(false)
+    alert("Gagal membuat film. Pastikan data valid.")
   }
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      navigate("/admin/film")
-    }, 2000)
-  }
+}
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -113,19 +126,16 @@ export default function AdminCreateFilmPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Category</label>
+                    <label className="block text-sm font-medium text-gray-700">Rating</label>
                     <select
-                      name="category"
-                      value={form.category}
+                      name="rating"
+                      value={form.rating}
                       onChange={handleChange}
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     >
-                      <option value="">Select Category</option>
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
+                      {ratings.map((rating) => (
+                        <option key={rating} value={rating}>{rating}</option>
                       ))}
                     </select>
                   </div>
@@ -143,48 +153,15 @@ export default function AdminCreateFilmPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Movie Poster</label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="poster-upload"
-                      />
-                      <label htmlFor="poster-upload" className="cursor-pointer">
-                        {preview ? (
-                          <div className="space-y-2">
-                            <img
-                              src={preview || "/placeholder.svg"}
-                              alt="Preview"
-                              className="mx-auto rounded-lg max-h-48 object-contain"
-                            />
-                            <p className="text-sm text-gray-600">Click to change poster</p>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <svg
-                              className="mx-auto h-12 w-12 text-gray-400"
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 48 48"
-                            >
-                              <path
-                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                strokeWidth={2}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            <div>
-                              <p className="text-gray-600">Upload movie poster</p>
-                              <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
-                            </div>
-                          </div>
-                        )}
-                      </label>
-                    </div>
+                    <label className="block text-sm font-medium text-gray-700">Movie Poster URL</label>
+                    <Input
+                      label="Poster URL"
+                      name="poster_url"
+                      value={form.poster_url}
+                      onChange={handleChange}
+                      placeholder="https://yourdomain.com/public/posters/12345.jpg"
+                      required
+                    />
                   </div>
                 </div>
               </div>

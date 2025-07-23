@@ -10,18 +10,7 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const navigate = useNavigate()
 
-  const posterMap = {
-    "The Silent Wave": "/posters/1.jpg",
-    "Galactic Quest": "/posters/2.jpeg",
-    "Haunted Hollow": "/posters/3.jpeg",
-    "Laugh Factory": "/posters/4.jpeg",
-    "Speed Horizon": "/posters/5.jpg",
-    "Love in Rain": "/posters/6.jpeg",
-    "Mystery Code": "/posters/7.jpg",
-    "Wings of Glory": "/posters/8.jpg",
-    "Pixel Dreams": "/posters/9.png",
-    Echoes: "/posters/10.jpg",
-  }
+  // No posterMap, use poster_url from DB
 
   useEffect(() => {
     API.get("/films")
@@ -70,12 +59,12 @@ const Dashboard = () => {
             film?.title?.toLowerCase().includes(searchTerm.toLowerCase())
           ).map((film) => (
             <div
-              key={film.id}
+              key={film._id || film.id}
               className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="aspect-[3/4] relative">
                 <img
-                  src={posterMap[film.title] || "/posters/default.jpg"}
+                  src={film.poster_url || "/posters/default.jpg"}
                   alt={film.title}
                   className="w-full h-full object-cover"
                 />
@@ -83,10 +72,10 @@ const Dashboard = () => {
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-1">{film.title}</h3>
                 <p className="text-sm text-gray-600 mb-2">
-                  {film.genre} • {film.duration}min
+                  {(Array.isArray(film.genre) ? film.genre.join(", ") : film.genre)} • {film.duration}min
                 </p>
                 <button
-                  onClick={() => navigate(`/film/${film.id}`)}
+                  onClick={() => navigate(`/film/${film._id || film.id}`)}
                   className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
                 >
                   View Details

@@ -1,58 +1,77 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import AdminSidebar from "../components/organisms/AdminSidebar"
 import Button from "../components/atoms/Button"
 
-const initialFilms = [
-  {
-    id: 1,
-    title: "The Silent Wave",
-    genre: "Drama",
-    duration: 120,
-    category: "Regular",
-    poster: "/posters/1.jpg",
-    status: "Now Playing",
-  },
-  {
-    id: 2,
-    title: "Galactic Quest",
-    genre: "Sci-Fi",
-    duration: 135,
-    category: "IMAX",
-    poster: "/posters/2.jpeg",
-    status: "Coming Soon",
-  },
-  {
-    id: 3,
-    title: "Haunted Hollow",
-    genre: "Horror",
-    duration: 98,
-    category: "Regular",
-    poster: "/posters/3.jpeg",
-    status: "Now Playing",
-  },
-]
+import API from "../services/api"
 
-export default function AdminFilmPage() {
-  const [films, setFilms] = useState(initialFilms)
+function AdminFilmPage() {
+  const [films, setFilms] = useState([])
+  useEffect(() => {
+    async function fetchFilms() {
+      try {
+        const token = localStorage.getItem('jwt_token')
+        const res = await API.get("/films", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        // Data dari backend biasanya array of film
+        setFilms(res.data)
+      } catch {
+        setFilms([])
+      }
+    }
+    fetchFilms()
+  }, [])
   const [searchTerm, setSearchTerm] = useState("")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedFilmId, setSelectedFilmId] = useState(null)
   const navigate = useNavigate()
 
-  const filteredFilms = films.filter((film) => film.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredFilms = films.filter((film) => (film.title || "").toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const handleDeleteClick = (id) => {
-    setSelectedFilmId(id)
+  // Helper to validate MongoDB ObjectID
+  function isValidObjectId(id) {
+    return typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
+  }
+
+  const handleEditClick = (id, fallbackId) => {
+    // Use _id if available, else fallback to id
+    const filmId = id || fallbackId;
+    if (!filmId) {
+      alert("Film ID is undefined.");
+      return;
+    }
+    if (!isValidObjectId(filmId)) {
+      alert(`Invalid film ID: ${filmId}`);
+      return;
+    }
+    navigate(`/admin/edit/${filmId}`);
+  };
+
+  const handleDeleteClick = (id, fallbackId) => {
+    const filmId = id || fallbackId;
+    if (!filmId) {
+      alert("Film ID is undefined.");
+      return;
+    }
+    setSelectedFilmId(filmId)
     setShowDeleteModal(true)
   }
 
-  const confirmDelete = () => {
-    setFilms(films.filter((film) => film.id !== selectedFilmId))
-    setShowDeleteModal(false)
-    setSelectedFilmId(null)
+  const confirmDelete = async () => {
+    try {
+      const token = localStorage.getItem('jwt_token')
+      await API.delete(`/films/${selectedFilmId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setFilms(films.filter((film) => film._id !== selectedFilmId))
+      setShowDeleteModal(false)
+      setSelectedFilmId(null)
+    } catch {
+      alert("Gagal menghapus film.")
+    }
   }
 
   return (
@@ -82,34 +101,33 @@ export default function AdminFilmPage() {
 
           {/* Movies Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredFilms.map((film) => (
-              <div key={film.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <img src={film.poster || "/placeholder.svg"} alt={film.title} className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900">{film.title}</h3>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        film.status === "Now Playing" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {film.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {film.genre}  {film.duration}min  {film.category}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button variant="secondary" className="flex-1 text-sm">
-                      Edit
-                    </Button>
-                    <Button variant="danger" className="text-sm" onClick={() => handleDeleteClick(film.id)}>
-                      Delete
-                    </Button>
+            {filteredFilms.map((film) => {
+              return (
+                <div key={film._id || film.id || Math.random()} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <img src={film.poster_url || "/placeholder.svg"} alt={film.title} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900">{film.title}</h3>
+                      {/* Status bisa diambil dari field status jika ada, atau rating */}
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {film.status || film.rating || "-"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {(Array.isArray(film.genre) ? film.genre.join(", ") : film.genre)} | {film.duration}min
+                    </p>
+                    <div className="flex gap-2">
+                      <Button variant="secondary" className="flex-1 text-sm" onClick={() => handleEditClick(film._id, film.id)}>
+                        Edit
+                      </Button>
+                      <Button variant="danger" className="text-sm" onClick={() => handleDeleteClick(film._id, film.id)}>
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {filteredFilms.length === 0 && (
@@ -143,3 +161,5 @@ export default function AdminFilmPage() {
     </div>
   )
 }
+
+export default AdminFilmPage

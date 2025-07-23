@@ -54,7 +54,7 @@ const FilmDetail = () => {
           <div className="md:flex">
             <div className="md:w-1/3">
               <img
-                src={posterMap[film.title] || "/posters/default.jpg"}
+                src={film.poster_url || posterMap[film.title] || "/posters/default.jpg"}
                 alt={film.title}
                 className="w-full h-96 md:h-full object-cover"
               />
@@ -62,12 +62,12 @@ const FilmDetail = () => {
             <div className="md:w-2/3 p-6">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{film.title}</h1>
               <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                <span>{film.genre}</span>
+                <span>{Array.isArray(film.genre) ? film.genre.join(", ") : film.genre}</span>
                 <span>•</span>
                 <span>{film.duration} min</span>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                Experience this incredible movie with state-of-the-art sound and picture quality.
+                {film.description || "No description available."}
               </p>
             </div>
           </div>

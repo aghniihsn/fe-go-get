@@ -17,6 +17,7 @@ import AdminCreateJadwalPage from "./pages/AdminCreateJadwalPage";
 // import AdminTiketPage from "./pages/AdminTiketPage";
 // import AdminCreateTiketPage from "./pages/AdminCreateTiketPage";
 import AdminPesananPage from "./pages/AdminPesananPage";
+import AdminEditFilmPage from "./pages/AdminEditFilmPage";
 
 // Komponen proteksi route
 function ProtectedRoute({ children, role }) {
@@ -61,6 +62,16 @@ export default function App() {
             <ProtectedRoute role="admin">
               <MainLayout>
                 <AdminCreateFilmPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/edit/:id"
+          element={
+            <ProtectedRoute role="admin">
+              <MainLayout>
+                <AdminEditFilmPage />
               </MainLayout>
             </ProtectedRoute>
           }

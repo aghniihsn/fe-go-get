@@ -13,4 +13,9 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// Create film
+export const createFilm = async (data) => {
+  return API.post('/films', data);
+};
+
 export default API;
