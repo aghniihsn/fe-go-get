@@ -37,18 +37,13 @@ const Navbar = () => {
           MovieTix
         </Link>
 
-        {/* Navigation */}
+        {/* Navigation: Hide all menu for admin */}
         <div className="hidden md:flex items-center space-x-8">
-          {isLoggedIn() && (
+          {isLoggedIn() && role !== "admin" && (
             <>
               <Link to="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Movies
               </Link>
-              {role === "admin" && (
-                <Link to="/admin" className="text-gray-600 hover:text-gray-900 transition-colors">
-                  Admin
-                </Link>
-              )}
               <Link to="/pesanan" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Orders
               </Link>
