@@ -82,11 +82,10 @@ const BookForm = ({ jadwal }) => {
       }
 
       const res = await axios.post("/tikets", payload)
+      // Kirim seluruh data order ke halaman pembayaran
       navigate("/pembayaran", {
         state: {
-          username: form.username,
-          jumlah: form.jumlah,
-          totalHarga: res.data.total_harga,
+          order: res.data,
         },
       })
     } catch (err) {

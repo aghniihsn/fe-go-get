@@ -66,22 +66,22 @@ const PesananPage = () => {
         {Array.isArray(pesanan) && pesanan.length > 0 ? (
           <div className="space-y-4">
             {pesanan.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div key={item._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between">
                   <div className="flex-1 mb-4 md:mb-0">
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.nama}</h3>
-                    <p className="text-gray-600 text-sm mb-2">{item.email}</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">Ticket ID: {item._id}</h3>
+                    <p className="text-gray-600 text-sm mb-2">Kursi: {item.kursi}</p>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>Tickets: {item.jumlah}</span>
+                      <span>Status: {item.status}</span>
                       <span>•</span>
-                      <span>Total: Rp {item.total_harga?.toLocaleString()}</span>
+                      <span>Tanggal: {item.tanggal_pembelian ? new Date(item.tanggal_pembelian).toLocaleString() : '-'}</span>
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     <Button variant="secondary" className="text-sm">
                       View QR
                     </Button>
-                    <Button variant="danger" onClick={() => handleDelete(item.id)} className="text-sm">
+                    <Button variant="danger" onClick={() => handleDelete(item._id)} className="text-sm">
                       Cancel
                     </Button>
                   </div>
