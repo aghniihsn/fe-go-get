@@ -140,21 +140,21 @@ export default function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <MainLayout>
                 <Dashboard />
               </MainLayout>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/film/:id"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <MainLayout>
                 <FilmDetail />
               </MainLayout>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route

@@ -16,6 +16,7 @@ const BookForm = ({ jadwal }) => {
   const [totalHarga, setTotalHarga] = useState(jadwal.harga)
   const [loading, setLoading] = useState(false)
 
+  const [userData, setUserData] = useState(null)
   useEffect(() => {
     const userId = localStorage.getItem("user_id")
     if (userId) {
@@ -25,6 +26,7 @@ const BookForm = ({ jadwal }) => {
           username: res.data.username,
           email: res.data.email,
         }))
+        setUserData(res.data)
       })
     }
   }, [])
@@ -39,6 +41,16 @@ const BookForm = ({ jadwal }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    // Cek biodata user
+    if (userData) {
+      const requiredFields = ["firstname", "lastname", "gender", "phone_number", "profile_picture_url", "address"]
+      const incomplete = requiredFields.some((field) => !userData[field] || userData[field] === "")
+      if (incomplete) {
+        alert("Lengkapi biodata Anda terlebih dahulu.")
+        navigate("/profile")
+        return
+      }
+    }
     setLoading(true)
     try {
       const payload = {

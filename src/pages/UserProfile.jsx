@@ -7,7 +7,7 @@ import Button from "../components/atoms/Button"
 
 const UserProfile = () => {
   const [form, setForm] = useState({ nama: "", email: "" })
-  const [editName, setEditName] = useState(false)
+  const [editMode, setEditMode] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -30,18 +30,16 @@ const UserProfile = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     setSaving(true)
-    // Pisahkan nama menjadi first_name dan last_name
-    let first_name = ""
-    let last_name = ""
-    if (form.nama) {
-      const parts = form.nama.trim().split(" ")
-      first_name = parts[0]
-      last_name = parts.slice(1).join(" ")
-    }
+    // Kirim semua field biodata ke backend
     const payload = {
-      first_name,
-      last_name,
+      username: form.nama,
       email: form.email,
+      firstname: form.firstname,
+      lastname: form.lastname,
+      gender: form.gender,
+      phone_number: form.phone_number,
+      profile_picture_url: form.profile_picture_url,
+      address: form.address,
     }
     axios
       .put(`/users/${userId}`, payload)
@@ -75,21 +73,6 @@ const UserProfile = () => {
         {/* Profile Form */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Input
-                label="Full Name"
-                name="nama"
-                value={form.nama}
-                onChange={handleChange}
-                required
-                disabled={!editName}
-              />
-              {!editName ? (
-                <Button type="button" onClick={() => setEditName(true)} variant="secondary">Edit</Button>
-              ) : (
-                <Button type="button" onClick={() => setEditName(false)} variant="secondary">Cancel</Button>
-              )}
-            </div>
             <Input
               label="Email Address"
               name="email"
@@ -97,11 +80,69 @@ const UserProfile = () => {
               value={form.email}
               onChange={handleChange}
               required
+              disabled={!editMode}
             />
-
-            <div className="pt-4">
-              <Button type="submit" disabled={saving}>
+            <Input
+              label="First Name"
+              name="firstname"
+              value={form.firstname || ""}
+              onChange={handleChange}
+              required
+              disabled={!editMode}
+            />
+            <Input
+              label="Last Name"
+              name="lastname"
+              value={form.lastname || ""}
+              onChange={handleChange}
+              required
+              disabled={!editMode}
+            />
+            <Input
+              label="Gender"
+              name="gender"
+              value={form.gender || ""}
+              onChange={handleChange}
+              required
+              disabled={!editMode}
+            />
+            <Input
+              label="Phone Number"
+              name="phone_number"
+              value={form.phone_number || ""}
+              onChange={handleChange}
+              required
+              disabled={!editMode}
+            />
+            <Input
+              label="Profile Picture URL"
+              name="profile_picture_url"
+              value={form.profile_picture_url || ""}
+              onChange={handleChange}
+              disabled={!editMode}
+            />
+            <Input
+              label="Address"
+              name="address"
+              value={form.address || ""}
+              onChange={handleChange}
+              required
+              disabled={!editMode}
+            />
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                onClick={() => setEditMode(true)}
+                variant={!editMode ? undefined : "secondary"}
+                disabled={editMode}
+              >
+                Edit
+              </Button>
+              <Button type="submit" disabled={!editMode || saving}>
                 {saving ? "Saving..." : "Save Changes"}
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => setEditMode(false)} disabled={!editMode}>
+                Cancel
               </Button>
             </div>
           </form>
@@ -121,7 +162,7 @@ const UserProfile = () => {
               <Button
                 onClick={() => {
                   setShowSuccess(false)
-                  window.location.href = "/"
+                  window.location.href = "/profile"
                 }}
                 className="w-full"
               >

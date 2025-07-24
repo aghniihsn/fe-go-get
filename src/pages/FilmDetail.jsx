@@ -2,29 +2,21 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+
 import API from "../services/api"
+import { isLoggedIn } from "../utils/auth"
 import JadwalTable from "../components/molecules/JadwalTable"
 import BookForm from "../components/organisms/BookForm"
 
 const FilmDetail = () => {
+  const navigate = useNavigate()
   const { id } = useParams()
   const [film, setFilm] = useState(null)
   const [jadwals, setJadwals] = useState([])
   const [selectedJadwal, setSelectedJadwal] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const posterMap = {
-    "The Silent Wave": "/posters/1.jpg",
-    "Galactic Quest": "/posters/2.jpeg",
-    "Haunted Hollow": "/posters/3.jpeg",
-    "Laugh Factory": "/posters/4.jpeg",
-    "Speed Horizon": "/posters/5.jpg",
-    "Love in Rain": "/posters/6.jpeg",
-    "Mystery Code": "/posters/7.jpg",
-    "Wings of Glory": "/posters/8.jpg",
-    "Pixel Dreams": "/posters/9.png",
-    Echoes: "/posters/10.jpg",
-  }
 
   useEffect(() => {
     Promise.all([API.get(`/films/${id}`), API.get(`/jadwals/film/${id}`)])
@@ -54,7 +46,7 @@ const FilmDetail = () => {
           <div className="md:flex">
             <div className="md:w-1/3">
               <img
-                src={film.poster_url || posterMap[film.title] || "/posters/default.jpg"}
+                src={film.poster_url || "/posters/default.jpg"}
                 alt={film.title}
                 className="w-full h-96 md:h-full object-cover"
               />
@@ -78,7 +70,16 @@ const FilmDetail = () => {
         {/* Showtimes */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Showtimes</h2>
-          <JadwalTable jadwals={jadwals} onBook={setSelectedJadwal} />
+          <JadwalTable
+            jadwals={jadwals}
+            onBook={(jadwal) => {
+              if (!isLoggedIn()) {
+                navigate("/login")
+                return
+              }
+              setSelectedJadwal(jadwal)
+            }}
+          />
         </div>
 
         {/* Booking Form */}
