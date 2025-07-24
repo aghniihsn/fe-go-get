@@ -9,6 +9,24 @@ const PesananPage = () => {
   const [pesanan, setPesanan] = useState([])
   const [showReceiptModal, setShowReceiptModal] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [paymentStatus, setPaymentStatus] = useState('-')
+  // Ambil status pembayaran dari backend jika selectedOrder berubah
+  useEffect(() => {
+    if (selectedOrder && selectedOrder._id) {
+      axios.get(`/pembayarans/tiket/${selectedOrder._id}`)
+        .then(res => {
+          const pembayaranList = Array.isArray(res.data) ? res.data : []
+          if (pembayaranList.length > 0) {
+            setPaymentStatus(pembayaranList[pembayaranList.length - 1].status || '-')
+          } else {
+            setPaymentStatus('-')
+          }
+        })
+        .catch(() => setPaymentStatus('-'))
+    } else {
+      setPaymentStatus('-')
+    }
+  }, [selectedOrder])
 
   useEffect(() => {
     fetchPesanan()
@@ -78,10 +96,12 @@ const PesananPage = () => {
     doc.text(`Tanggal:`, 20, 75)
     doc.setFont(undefined, 'normal')
     doc.text(`${selectedOrder.tanggal_pembelian ? new Date(selectedOrder.tanggal_pembelian).toLocaleString() : '-'}`, 60, 75)
-    doc.setFont(undefined, 'bold')
-    doc.text(`Status:`, 20, 85)
-    doc.setFont(undefined, 'normal')
-    doc.text(`${selectedOrder.status}`, 60, 85)
+    if (paymentStatus !== '-') {
+      doc.setFont(undefined, 'bold')
+      doc.text(`Status Pembayaran:`, 20, 85)
+      doc.setFont(undefined, 'normal')
+      doc.text(`${paymentStatus}`, 60, 85)
+    }
     doc.setDrawColor(200, 200, 200)
     doc.line(20, 95, 190, 95)
     doc.setFontSize(11)
@@ -155,7 +175,9 @@ const PesananPage = () => {
                 }</div>
                 <div className="mb-2"><span className="font-semibold">Kursi:</span> {selectedOrder.kursi}</div>
                 <div className="mb-2"><span className="font-semibold">Tanggal:</span> {selectedOrder.tanggal_pembelian ? new Date(selectedOrder.tanggal_pembelian).toLocaleString() : '-'}</div>
-                <div className="mb-2"><span className="font-semibold">Status:</span> {selectedOrder.status}</div>
+                {paymentStatus && paymentStatus !== '-' && (
+                  <div className="mb-2"><span className="font-semibold">Status Pembayaran:</span> {paymentStatus}</div>
+                )}
               </div>
               <div className="flex gap-3">
                 <Button variant="primary" onClick={handleDownloadReceipt} className="flex-1">Download</Button>

@@ -31,6 +31,24 @@ const PaymentPage = () => {
   const jumlahTiketFromState = location.state?.jumlah || null;
   // Ambil data tiket dari initialOrder.tiket jika ada
   const [order, setOrder] = useState(initialOrder?.tiket || null)
+  const [paymentStatus, setPaymentStatus] = useState('-')
+  // Ambil status pembayaran dari backend jika order tersedia
+  useEffect(() => {
+    if (order && order._id) {
+      api.get(`/pembayarans/tiket/${order._id}`)
+        .then(res => {
+          const pembayaranList = Array.isArray(res.data) ? res.data : []
+          if (pembayaranList.length > 0) {
+            setPaymentStatus(pembayaranList[pembayaranList.length - 1].status || '-')
+          } else {
+            setPaymentStatus('-')
+          }
+        })
+        .catch(() => setPaymentStatus('-'))
+    } else {
+      setPaymentStatus('-')
+    }
+  }, [order])
   const [loading, setLoading] = useState(initialOrder ? false : true)
   const [processing, setProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("")
@@ -179,10 +197,12 @@ const PaymentPage = () => {
                     <span className="text-gray-600">Jadwal:</span>
                     <span className="text-gray-900">{jadwalDetail?.tanggal ? new Date(jadwalDetail.tanggal).toLocaleString() : order.jadwal_id || '-'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <span className="text-gray-900">{order.status || '-'}</span>
-                  </div>
+                  {paymentStatus !== '-' && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status Pembayaran:</span>
+                      <span className="text-gray-900">{paymentStatus}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tanggal Pembelian:</span>
                     <span className="text-gray-900">{order.tanggal_pembelian ? new Date(order.tanggal_pembelian).toLocaleString() : '-'}</span>

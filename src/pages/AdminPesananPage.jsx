@@ -1,41 +1,71 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import axios from "../services/api"
 import AdminSidebar from "../components/organisms/AdminSidebar"
 
 const AdminPesananPage = () => {
-  const [pesananList] = useState([
-    {
-      id: 1,
-      user: "John Doe",
-      film: "The Silent Wave",
-      jadwal: "2025-07-20 19:00",
-      kursi: "A1",
-      harga: 50000,
-      status: "paid",
-      email: "john@example.com",
-    },
-    {
-      id: 2,
-      user: "Jane Smith",
-      film: "Galactic Quest",
-      jadwal: "2025-07-21 20:00",
-      kursi: "B2",
-      harga: 75000,
-      status: "pending",
-      email: "jane@example.com",
-    },
-    {
-      id: 3,
-      user: "Bob Johnson",
-      film: "Haunted Hollow",
-      jadwal: "2025-07-22 15:00",
-      kursi: "C3",
-      harga: 45000,
-      status: "paid",
-      email: "bob@example.com",
-    },
-  ])
+  const [pesananList, setPesananList] = useState([])
+
+  useEffect(() => {
+    const fetchPesanan = async () => {
+      try {
+        const [tiketRes, pembayaranRes] = await Promise.all([
+          axios.get("/tikets"),
+          axios.get("/pembayarans")
+        ])
+        const tiketList = Array.isArray(tiketRes.data) ? tiketRes.data : []
+        const pembayaranList = Array.isArray(pembayaranRes.data) ? pembayaranRes.data : []
+        // Buat map pembayaran berdasarkan tiket_id
+        const pembayaranMap = {}
+        pembayaranList.forEach((pembayaran) => {
+          if (pembayaran.tiket_id) {
+            pembayaranMap[pembayaran.tiket_id] = pembayaran.status || "-"
+          }
+        })
+        // Untuk setiap tiket, fetch detail user dan jadwal
+        const pesananWithDetail = await Promise.all(
+          tiketList.map(async (tiket) => {
+            let user = "-", email = "-", film = "-", jadwal = "-", harga = 0
+            // Fetch user
+            try {
+              const userRes = await axios.get(`/users/${tiket.user_id}`)
+              user = userRes.data.username || userRes.data.firstname || "-"
+              email = userRes.data.email || "-"
+            } catch {
+              // ignore user fetch error
+            }
+            // Fetch jadwal
+            try {
+              const jadwalRes = await axios.get(`/jadwals/${tiket.jadwal_id}`)
+              const jadwalData = jadwalRes.data
+              film = jadwalData.tittle || jadwalData.title || jadwalData.film_title || jadwalData.judul || (jadwalData.film && (jadwalData.film.tittle || jadwalData.film.title || jadwalData.film.judul)) || "-"
+              jadwal = jadwalData.tanggal ? new Date(jadwalData.tanggal).toLocaleString() : "-"
+              harga = jadwalData.harga || 0
+            } catch {
+              // ignore jadwal fetch error
+            }
+            // Ambil status pembayaran dari map
+            const paymentStatus = pembayaranMap[tiket._id] || "-"
+            return {
+              id: tiket._id,
+              user,
+              email,
+              film,
+              jadwal,
+              kursi: tiket.kursi,
+              harga,
+              status: paymentStatus,
+            }
+          })
+        )
+        setPesananList(pesananWithDetail)
+      } catch {
+        setPesananList([])
+      }
+    }
+    fetchPesanan()
+  }, [])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -103,11 +133,15 @@ const AdminPesananPage = () => {
                         Rp {pesanan.harga.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(pesanan.status)}`}
-                        >
-                          {pesanan.status}
-                        </span>
+                        {pesanan.status && pesanan.status !== '-' ? (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(pesanan.status)}`}
+                          >
+                            {pesanan.status}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">-</span>
+                        )}
                       </td>
                     </tr>
                   ))}
