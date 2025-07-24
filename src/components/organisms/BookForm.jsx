@@ -79,6 +79,8 @@ const BookForm = ({ jadwal }) => {
         jumlah: Number.parseInt(form.jumlah),
         user_id,
         kursi,
+        studio: jadwal.studio || (jadwal.film && jadwal.film.studio) || "",
+        film_judul: jadwal.film && jadwal.film.judul ? jadwal.film.judul : jadwal.judul || "",
       }
 
       const res = await axios.post("/tikets", payload)

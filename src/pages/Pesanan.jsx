@@ -1,56 +1,68 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import jsPDF from "jspdf"
 import axios from "../services/api"
 import Button from "../components/atoms/Button"
 
 const PesananPage = () => {
   const [pesanan, setPesanan] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedId, setSelectedId] = useState(null)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showReceiptModal, setShowReceiptModal] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState(null)
 
   useEffect(() => {
     fetchPesanan()
   }, [])
 
-  const fetchPesanan = () => {
+  const fetchPesanan = async () => {
     const userId = localStorage.getItem("user_id")
-    axios
-      .get(`/tikets/user/${userId}`)
-      .then((res) => {
-        setPesanan(Array.isArray(res.data) ? res.data : [])
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error(err)
-        setPesanan([])
-        setLoading(false)
-      })
+    try {
+      const res = await axios.get(`/tikets/user/${userId}`)
+      const tiketList = Array.isArray(res.data) ? res.data : []
+      // Fetch jadwal detail untuk setiap tiket
+      const tiketWithJadwal = await Promise.all(
+        tiketList.map(async (tiket) => {
+          if (tiket.jadwal_id) {
+            try {
+              const jadwalRes = await axios.get(`/jadwals/${tiket.jadwal_id}`)
+              const jadwal = jadwalRes.data
+              return {
+                ...tiket,
+                tittle: jadwal.film_title || '-',
+                ruangan: jadwal.ruangan || jadwal.studio || '-',
+              }
+            } catch {
+              return tiket
+            }
+          }
+          return tiket
+        })
+      )
+      setPesanan(tiketWithJadwal)
+    } catch (err) {
+      console.error(err)
+      setPesanan([])
+    }
   }
 
-  const handleDelete = (id) => {
-    setSelectedId(id)
-    setShowDeleteModal(true)
+  const handleShowReceipt = (order) => {
+    setSelectedOrder(order)
+    setShowReceiptModal(true)
   }
 
-  const confirmDelete = () => {
-    axios
-      .delete(`/tikets/${selectedId}`)
-      .then(() => {
-        fetchPesanan()
-        setShowDeleteModal(false)
-        setSelectedId(null)
-      })
-      .catch(() => alert("Failed to delete ticket"))
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-900 border-t-transparent"></div>
-      </div>
-    )
+  const handleDownloadReceipt = () => {
+    if (!selectedOrder) return
+    const doc = new jsPDF()
+    doc.setFontSize(16)
+    doc.text("Movie Ticket Receipt", 20, 20)
+    doc.setFontSize(12)
+    doc.text(`Ticket ID: ${selectedOrder._id}`, 20, 35)
+    doc.text(`Film: ${selectedOrder.tittle || selectedOrder.title || selectedOrder.film_tittle || selectedOrder.film_title || selectedOrder.film_judul || selectedOrder.judul || (selectedOrder.film && (selectedOrder.film.tittle || selectedOrder.film.title || selectedOrder.film.judul)) || '-'}`, 20, 45)
+    doc.text(`Studio: ${selectedOrder.ruangan || selectedOrder.studio || selectedOrder.studio_name || (selectedOrder.film && (selectedOrder.film.ruangan || selectedOrder.film.studio || selectedOrder.film.studio_name)) || selectedOrder.film_studio || '-'}`, 20, 55)
+    doc.text(`Kursi: ${selectedOrder.kursi}`, 20, 65)
+    doc.text(`Tanggal: ${selectedOrder.tanggal_pembelian ? new Date(selectedOrder.tanggal_pembelian).toLocaleString() : '-'}`, 20, 75)
+    doc.text(`Status: ${selectedOrder.status}`, 20, 85)
+    doc.save(`receipt_${selectedOrder._id}.pdf`)
   }
 
   return (
@@ -65,7 +77,7 @@ const PesananPage = () => {
         {/* Orders */}
         {Array.isArray(pesanan) && pesanan.length > 0 ? (
           <div className="space-y-4">
-            {pesanan.map((item) => (
+        {pesanan.map((item) => (
               <div key={item._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between">
                   <div className="flex-1 mb-4 md:mb-0">
@@ -78,11 +90,8 @@ const PesananPage = () => {
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="secondary" className="text-sm">
-                      View QR
-                    </Button>
-                    <Button variant="danger" onClick={() => handleDelete(item._id)} className="text-sm">
-                      Cancel
+                    <Button variant="secondary" className="text-sm" onClick={() => handleShowReceipt(item)}>
+                      Receipt
                     </Button>
                   </div>
                 </div>
@@ -107,21 +116,26 @@ const PesananPage = () => {
           </div>
         )}
 
-        {/* Delete Modal */}
-        {showDeleteModal && (
+        {/* Receipt Modal */}
+        {showReceiptModal && selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Cancel Booking?</h3>
-              <p className="text-gray-600 mb-4">
-                Are you sure you want to cancel this booking? This action cannot be undone.
-              </p>
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Receipt</h3>
+              <div className="mb-4">
+                <div className="mb-2"><span className="font-semibold">Ticket ID:</span> {selectedOrder._id}</div>
+                <div className="mb-2"><span className="font-semibold">Film:</span> {
+                  selectedOrder.tittle || selectedOrder.title || selectedOrder.film_tittle || selectedOrder.film_title || selectedOrder.film_judul || selectedOrder.judul || (selectedOrder.film && (selectedOrder.film.tittle || selectedOrder.film.title || selectedOrder.film.judul)) || '-'
+                }</div>
+                <div className="mb-2"><span className="font-semibold">Studio:</span> {
+                  selectedOrder.ruangan || selectedOrder.studio || selectedOrder.studio_name || (selectedOrder.film && (selectedOrder.film.ruangan || selectedOrder.film.studio || selectedOrder.film.studio_name)) || selectedOrder.film_studio || '-'
+                }</div>
+                <div className="mb-2"><span className="font-semibold">Kursi:</span> {selectedOrder.kursi}</div>
+                <div className="mb-2"><span className="font-semibold">Tanggal:</span> {selectedOrder.tanggal_pembelian ? new Date(selectedOrder.tanggal_pembelian).toLocaleString() : '-'}</div>
+                <div className="mb-2"><span className="font-semibold">Status:</span> {selectedOrder.status}</div>
+              </div>
               <div className="flex gap-3">
-                <Button variant="danger" onClick={confirmDelete} className="flex-1">
-                  Yes, Cancel
-                </Button>
-                <Button variant="secondary" onClick={() => setShowDeleteModal(false)} className="flex-1">
-                  Keep
-                </Button>
+                <Button variant="primary" onClick={handleDownloadReceipt} className="flex-1">Download</Button>
+                <Button variant="secondary" onClick={() => setShowReceiptModal(false)} className="flex-1">Close</Button>
               </div>
             </div>
           </div>

@@ -165,7 +165,15 @@ const PaymentPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Film:</span>
-                    <span className="text-gray-900">{jadwalDetail?.film_title || order.film_title || '-'}</span>
+                    <span className="text-gray-900">{
+                      jadwalDetail?.tittle || jadwalDetail?.film_tittle || order.tittle || order.film_tittle || (order.film && (order.film.tittle || order.film.title)) || jadwalDetail?.film_judul || jadwalDetail?.film_title || order.film_judul || order.film_title || (order.film && order.film.judul) || '-'
+                    }</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Studio:</span>
+                    <span className="text-gray-900">{
+                      jadwalDetail?.ruangan || order.ruangan || (jadwalDetail?.film && (jadwalDetail.film.ruangan || jadwalDetail.film.studio || jadwalDetail.film.studio_name)) || order.studio || order.studio_name || (order.film && (order.film.ruangan || order.film.studio || order.film.studio_name)) || order.film_studio || '-'
+                    }</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Jadwal:</span>
