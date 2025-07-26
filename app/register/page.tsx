@@ -35,12 +35,15 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      await register(formData)
+      const { redirectTo } = await register(formData)
+
       toast({
         title: "Success",
         description: "Registration successful!",
       })
-      router.push("/")
+
+      // Redirect based on user role (though new users are typically regular users)
+      router.push(redirectTo)
     } catch (error: any) {
       toast({
         title: "Error",

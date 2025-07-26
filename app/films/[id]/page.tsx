@@ -34,11 +34,20 @@ export default function FilmDetailPage() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await api.get(`/jadwals/film/${params.id}`)
-      setSchedules(response.data || []) // Ensure we always set an array
+      // Gunakan endpoint yang sudah ada dengan filter film_id yang benar
+      const response = await api.get(`/jadwals/detail?film_id=${params.id}`)
+      console.log("Schedules response for film:", params.id, response.data)
+
+      // Filter jadwal berdasarkan film_id untuk memastikan hanya jadwal film ini yang ditampilkan
+      const filmSchedules = Array.isArray(response.data)
+        ? response.data.filter((schedule) => schedule.film_id === params.id)
+        : []
+
+      console.log("Filtered schedules for this film:", filmSchedules)
+      setSchedules(filmSchedules)
     } catch (error) {
       console.error("Error fetching schedules:", error)
-      setSchedules([]) // Set empty array on error
+      setSchedules([])
     } finally {
       setLoading(false)
     }
@@ -96,13 +105,13 @@ export default function FilmDetailPage() {
                   <Clock className="w-4 h-4 mr-1" />
                   {film.duration} min
                 </div>
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(film.release_date).getFullYear()}
-                </div>
-                <span className="px-2 py-1 bg-secondary rounded-md text-sm">
-                  {Array.isArray(film.genre) ? film.genre.join(", ") : film.genre}
-                </span>
+                {film.release_date && (
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {new Date(film.release_date).getFullYear()}
+                  </div>
+                )}
+                <span className="px-2 py-1 bg-secondary rounded-md text-sm">{film.genre.join(", ")}</span>
               </div>
 
               <p className="text-muted-foreground leading-relaxed">{film.description}</p>
@@ -113,7 +122,7 @@ export default function FilmDetailPage() {
               {schedules && schedules.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {schedules.map((schedule) => (
-                    <ScheduleCard key={schedule.id} schedule={schedule} />
+                    <ScheduleCard key={schedule._id} schedule={schedule} />
                   ))}
                 </div>
               ) : (

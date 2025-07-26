@@ -29,10 +29,134 @@ export default function AdminPaymentsPage() {
     filterPayments()
   }, [payments, searchTerm, statusFilter])
 
+  const fetchUserById = async (userId: string): Promise<any> => {
+    if (!userId || userId === "null" || userId === "undefined") {
+      return null
+    }
+
+    try {
+      // Try different possible endpoints for user data
+      const endpoints = [`/users/${userId}`, `/auth/users/${userId}`, `/user/${userId}`]
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await api.get(endpoint)
+          if (response.data) {
+            return response.data
+          }
+        } catch (error: any) {
+          continue
+        }
+      }
+
+      // If individual user fetch fails, try to get from all users
+      try {
+        const allUsersResponse = await api.get("/users")
+        const users = Array.isArray(allUsersResponse.data) ? allUsersResponse.data : []
+        const user = users.find((u: any) => u._id === userId)
+        if (user) {
+          return user
+        }
+      } catch (error) {
+        // Silent fail
+      }
+
+      return null
+    } catch (error) {
+      return null
+    }
+  }
+
   const fetchPayments = async () => {
     try {
-      const response = await api.get("/pembayarans")
-      setPayments(response.data)
+      setIsLoading(true)
+
+      // 1. Fetch all payments
+      const paymentsResponse = await api.get("/pembayarans")
+      const paymentsData = Array.isArray(paymentsResponse.data) ? paymentsResponse.data : []
+
+      if (paymentsData.length === 0) {
+        setPayments([])
+        return
+      }
+
+      // 2. Fetch tickets, schedules, and films in parallel
+      const [ticketsResponse, schedulesResponse, filmsResponse] = await Promise.all([
+        api.get("/tikets").catch(() => ({ data: [] })),
+        api.get("/jadwals").catch(() => ({ data: [] })),
+        api.get("/films").catch(() => ({ data: [] })),
+      ])
+
+      const tickets = Array.isArray(ticketsResponse.data) ? ticketsResponse.data : []
+      const schedules = Array.isArray(schedulesResponse.data) ? schedulesResponse.data : []
+      const films = Array.isArray(filmsResponse.data) ? filmsResponse.data : []
+
+      // 3. Create lookup maps
+      const ticketsMap = tickets.reduce((acc: { [key: string]: any }, ticket: any) => {
+        acc[ticket._id] = ticket
+        return acc
+      }, {})
+
+      const schedulesMap = schedules.reduce((acc: { [key: string]: any }, schedule: any) => {
+        acc[schedule._id] = schedule
+        return acc
+      }, {})
+
+      const filmsMap = films.reduce((acc: { [key: string]: any }, film: any) => {
+        acc[film._id] = film
+        return acc
+      }, {})
+
+      // 4. Get unique user IDs from tickets
+      const validTickets = paymentsData
+        .map((payment: any) => ticketsMap[payment.tiket_id])
+        .filter((ticket: any) => ticket)
+
+      const uniqueUserIds = [
+        ...new Set(
+          validTickets
+            .map((ticket: any) => ticket.user_id)
+            .filter((userId: any) => userId && userId !== "null" && userId !== "undefined" && userId.trim() !== ""),
+        ),
+      ]
+
+      // 5. Fetch users individually
+      const usersData = await Promise.all(
+        uniqueUserIds.map(async (userId) => {
+          const user = await fetchUserById(userId)
+          return { userId, user }
+        }),
+      )
+
+      // 6. Create users map
+      const usersMap = usersData.reduce((acc: { [key: string]: any }, { userId, user }) => {
+        acc[userId] = user
+        return acc
+      }, {})
+
+      // 7. Process payments and enrich with related data
+      const processedPayments = paymentsData.map((payment: any) => {
+        const ticketId = payment.tiket_id
+        const ticket = ticketsMap[ticketId]
+        const schedule = ticket ? schedulesMap[ticket.jadwal_id] : null
+        const film = schedule ? filmsMap[schedule.film_id] : null
+        const user = ticket ? usersMap[ticket.user_id] : null
+
+        return {
+          ...payment,
+          id: payment.id || payment._id,
+          user: user,
+          ticket: {
+            ...ticket,
+            schedule: {
+              ...schedule,
+              film: film || schedule?.film,
+            },
+          },
+        }
+      })
+
+      setPayments(processedPayments)
     } catch (error) {
       console.error("Error fetching payments:", error)
       toast({
@@ -40,6 +164,7 @@ export default function AdminPaymentsPage() {
         description: "Failed to fetch payments",
         variant: "destructive",
       })
+      setPayments([])
     } finally {
       setIsLoading(false)
     }
@@ -173,6 +298,7 @@ export default function AdminPaymentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Payment ID</TableHead>
                       <TableHead>User</TableHead>
                       <TableHead>Movie</TableHead>
                       <TableHead>Payment Method</TableHead>
@@ -186,14 +312,28 @@ export default function AdminPaymentsPage() {
                     {filteredPayments.map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell>
+                          <div className="font-mono text-xs">#{(payment.id || payment._id)?.toString().slice(-8)}</div>
+                        </TableCell>
+                        <TableCell>
                           <div>
                             <div className="font-medium">
-                              {payment.user?.firstname} {payment.user?.lastname}
+                              {payment.user?.firstname && payment.user?.lastname
+                                ? `${payment.user.firstname} ${payment.user.lastname}`
+                                : payment.user?.username || "Unknown User"}
                             </div>
-                            <div className="text-sm text-muted-foreground">{payment.user?.email}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {payment.user?.email || "No email available"}
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">{payment.ticket?.schedule?.film?.title || "N/A"}</TableCell>
+                        <TableCell className="font-medium">
+                          <div>
+                            <div>{payment.ticket?.schedule?.film?.title || "Unknown Movie"}</div>
+                            {payment.ticket?.schedule?.ruangan && (
+                              <div className="text-sm text-muted-foreground">{payment.ticket.schedule.ruangan}</div>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="capitalize">{payment.metode_pembayaran}</TableCell>
                         <TableCell>
                           <PriceDisplay price={payment.jumlah} />

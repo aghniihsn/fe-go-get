@@ -29,7 +29,7 @@ export function MovieCard({ film }: MovieCardProps) {
         <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{film.description}</p>
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="w-4 h-4 mr-1" />
-          {film.duration} min • {Array.isArray(film.genre) ? film.genre.join(", ") : film.genre}
+          {film.duration} min • {film.genre.join(", ")}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">

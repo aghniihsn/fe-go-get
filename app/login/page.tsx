@@ -26,12 +26,15 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await login(email, password)
+      const { redirectTo } = await login(email, password)
+
       toast({
         title: "Success",
         description: "Login successful!",
       })
-      router.push("/")
+
+      // Redirect based on user role
+      router.push(redirectTo)
     } catch (error: any) {
       toast({
         title: "Error",
