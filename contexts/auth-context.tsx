@@ -6,11 +6,12 @@ import type { User } from "@/lib/types"
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<void>
-  register: (userData: any) => Promise<void>
+  login: (email: string, password: string) => Promise<{ redirectTo: string }>
+  register: (userData: any) => Promise<{ redirectTo: string }>
   logout: () => void
   loading: boolean
   isAdmin: boolean
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<{ redirectTo: string }> => {
     const response = await api.post("/auth/login", { email, password })
     const { token, user: userData } = response.data
 
@@ -73,9 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCookie("token", token)
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`
     setUser(userData)
+
+    // Determine redirect path based on user role
+    const redirectTo = userData.role === "admin" ? "/admin" : "/"
+    return { redirectTo }
   }
 
-  const register = async (userData: any) => {
+  const register = async (userData: any): Promise<{ redirectTo: string }> => {
     const response = await api.post("/auth/register", userData)
     const { token, user: newUser } = response.data
 
@@ -83,6 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCookie("token", token)
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`
     setUser(newUser)
+
+    // New users are typically regular users, redirect to homepage
+    const redirectTo = newUser.role === "admin" ? "/admin" : "/"
+    return { redirectTo }
   }
 
   const logout = () => {
@@ -92,8 +101,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const refreshProfile = async () => {
+    try {
+      const response = await api.get("/auth/profile")
+      setUser(response.data)
+    } catch (error) {
+      console.error("Failed to refresh profile:", error)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, isAdmin }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, isAdmin, refreshProfile }}>
+      {children}
+    </AuthContext.Provider>
   )
 }
 

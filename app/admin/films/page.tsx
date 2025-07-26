@@ -19,10 +19,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { api } from "@/lib/api"
 import type { Film } from "@/lib/types"
-import { Plus, Edit, Trash2, Loader2, Upload, X } from "lucide-react"
+import { Plus, Edit, Trash2, Loader2, Upload, X, AlertTriangle } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import Image from "next/image"
 
@@ -39,6 +50,7 @@ export default function AdminFilmsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingFilm, setEditingFilm] = useState<Film | null>(null)
+  const [deletingFilm, setDeletingFilm] = useState<Film | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>("")
   const [formData, setFormData] = useState({
@@ -281,16 +293,17 @@ export default function AdminFilmsPage() {
     setIsDialogOpen(true)
   }
 
-  const handleDelete = async (filmId: string) => {
-    if (!confirm("Are you sure you want to delete this film?")) return
+  const handleDeleteConfirm = async () => {
+    if (!deletingFilm) return
 
     try {
-      await api.delete(`/films/${filmId}`)
+      await api.delete(`/films/${deletingFilm._id}`)
       toast({
         title: "Success",
         description: "Film deleted successfully",
       })
       fetchFilms()
+      setDeletingFilm(null)
     } catch (error: any) {
       toast({
         title: "Error",
@@ -557,9 +570,41 @@ export default function AdminFilmsPage() {
                           <Button variant="outline" size="sm" onClick={() => handleEdit(film)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDelete(film._id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => setDeletingFilm(film)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="flex items-center gap-2">
+                                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                                  Delete Film
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this film? This action cannot be undone and will also
+                                  remove all associated schedules and bookings.
+                                  <div className="mt-3 p-3 bg-muted rounded-lg">
+                                    <p className="font-medium">{film.title}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {Array.isArray(film.genre) ? film.genre.join(", ") : film.genre} • {film.duration}{" "}
+                                      min
+                                    </p>
+                                  </div>
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setDeletingFilm(null)}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={handleDeleteConfirm}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete Film
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>

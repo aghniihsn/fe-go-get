@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Logo } from "@/components/atoms/logo"
 import { UserMenu } from "@/components/molecules/user-menu"
+import { ThemeToggle } from "@/components/atoms/theme-toggle"
 import { useAuth } from "@/contexts/auth-context"
 import { Menu, Film, Ticket, Shield } from "lucide-react"
 
@@ -13,10 +14,17 @@ export function Navbar() {
   const { user, isAdmin } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
 
-  const navigation = [
-    { name: "Films", href: "/films", icon: Film },
-    { name: "My Tickets", href: "/tickets", icon: Ticket },
-  ]
+  // Different navigation items for admin vs regular users
+  const navigation = isAdmin
+    ? [
+        { name: "Dashboard", href: "/admin", icon: Shield },
+        { name: "Films", href: "/admin/films", icon: Film },
+        { name: "Tickets", href: "/admin/tickets", icon: Ticket },
+      ]
+    : [
+        { name: "Films", href: "/films", icon: Film },
+        { name: "My Tickets", href: "/tickets", icon: Ticket },
+      ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -47,16 +55,6 @@ export function Navbar() {
                     <span>{item.name}</span>
                   </Link>
                 ))}
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Shield className="h-4 w-4" />
-                    <span>Admin Panel</span>
-                  </Link>
-                )}
               </nav>
             </div>
           </SheetContent>
@@ -72,15 +70,10 @@ export function Navbar() {
               {item.name}
             </Link>
           ))}
-          {isAdmin && (
-            <Link href="/admin" className="transition-colors hover:text-primary flex items-center space-x-1">
-              <Shield className="h-4 w-4" />
-              <span>Admin</span>
-            </Link>
-          )}
         </nav>
 
         <div className="flex items-center space-x-4 ml-auto">
+          <ThemeToggle />
           {user ? (
             <UserMenu />
           ) : (
