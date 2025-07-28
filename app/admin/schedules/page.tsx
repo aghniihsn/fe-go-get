@@ -6,37 +6,16 @@ import { useEffect, useState } from "react"
 import { AdminLayout } from "@/components/templates/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { ScheduleDialog } from "@/components/organisms/schedule-dialog"
+import { ScheduleTable } from "@/components/organisms/schedule-table"
+import { ScheduleDeleteDialog } from "@/components/molecules/schedule-delete-dialog"
+import { ScheduleStats } from "@/components/organisms/schedule-stats"
 import { api } from "@/lib/api"
 import type { Film } from "@/lib/types"
-import { Plus, Edit, Trash2, Loader2, Search, Calendar, Clock, MapPin, FilmIcon, AlertTriangle } from "lucide-react"
+import { Plus, Loader2, Search, Calendar} from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import Image from "next/image"
-
 interface Schedule {
   _id: string
   film_id: string
@@ -372,44 +351,11 @@ export default function AdminSchedulesPage() {
   return (
     <AdminLayout title="Schedule Management">
       <div className="space-y-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Calendar className="h-4 w-4 mr-2" />
-                Total Schedules
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalSchedules}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Clock className="h-4 w-4 mr-2" />
-                Today's Shows
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{todaySchedules}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <MapPin className="h-4 w-4 mr-2" />
-                Upcoming Shows
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{upcomingSchedules}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Schedules Table */}
+        <ScheduleStats
+          totalSchedules={totalSchedules}
+          todaySchedules={todaySchedules}
+          upcomingSchedules={upcomingSchedules}
+        />
         <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -417,7 +363,6 @@ export default function AdminSchedulesPage() {
                 <CardTitle>All Schedules</CardTitle>
                 <CardDescription>Manage movie showtimes and schedules</CardDescription>
               </div>
-
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -454,136 +399,24 @@ export default function AdminSchedulesPage() {
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
-                <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-                  <DialogTrigger asChild>
-                    <Button onClick={handleAddScheduleClick}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Schedule
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>{editingSchedule ? "Edit Schedule" : "Add New Schedule"}</DialogTitle>
-                      <DialogDescription>
-                        {editingSchedule ? "Update schedule information" : "Add a new movie schedule"}
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={handleSubmit}>
-                      <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="film_id">Movie *</Label>
-                          <Select
-                            value={formData.film_id}
-                            onValueChange={(value) => setFormData((prev) => ({ ...prev, film_id: value }))}
-                            disabled={isSubmitting}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a movie" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {films.map((film) => (
-                                <SelectItem key={film._id} value={film._id}>
-                                  <div className="flex items-center space-x-2">
-                                    <FilmIcon className="h-4 w-4" />
-                                    <span>{film.title}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="tanggal">Date *</Label>
-                            <Input
-                              id="tanggal"
-                              type="date"
-                              value={formData.tanggal}
-                              onChange={(e) => setFormData((prev) => ({ ...prev, tanggal: e.target.value }))}
-                              required
-                              disabled={isSubmitting}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="waktu">Time *</Label>
-                            <Input
-                              id="waktu"
-                              type="time"
-                              value={formData.waktu}
-                              onChange={(e) => setFormData((prev) => ({ ...prev, waktu: e.target.value }))}
-                              required
-                              disabled={isSubmitting}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="ruangan">Studio *</Label>
-                            <Select
-                              value={formData.ruangan}
-                              onValueChange={(value) => setFormData((prev) => ({ ...prev, ruangan: value }))}
-                              disabled={isSubmitting}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select studio" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {studioOptions.map((studio) => (
-                                  <SelectItem key={studio} value={studio}>
-                                    Studio {studio}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="harga">Price (IDR) *</Label>
-                            <Input
-                              id="harga"
-                              type="number"
-                              min="0"
-                              step="1000"
-                              value={formData.harga}
-                              onChange={(e) => setFormData((prev) => ({ ...prev, harga: e.target.value }))}
-                              placeholder="50000"
-                              required
-                              disabled={isSubmitting}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
-                          <p className="font-medium mb-1">Note:</p>
-                          <p>• Seats will be managed automatically by the system</p>
-                          <p>• Make sure the date and time don't conflict with existing schedules</p>
-                          <p>• Available studios: 1, 2, 3, 4, 5</p>
-                        </div>
-                      </div>
-
-                      <DialogFooter>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setIsDialogOpen(false)}
-                          disabled={isSubmitting}
-                        >
-                          Cancel
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          {editingSchedule ? "Update Schedule" : "Create Schedule"}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                <Button onClick={handleAddScheduleClick}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Schedule
+                </Button>
+                <ScheduleDialog
+                  isDialogOpen={isDialogOpen}
+                  handleDialogOpenChange={handleDialogOpenChange}
+                  handleSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                  editingSchedule={editingSchedule}
+                  formData={formData}
+                  setFormData={setFormData}
+                  films={films}
+                  studioOptions={studioOptions}
+                />
               </div>
             </div>
           </CardHeader>
-
           <CardContent>
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
@@ -591,110 +424,16 @@ export default function AdminSchedulesPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Movie</TableHead>
-                      <TableHead>Studio</TableHead>
-                      <TableHead>Date & Time</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSchedules.map((schedule) => {
-                      const status = getScheduleStatus(schedule.tanggal, schedule.waktu)
-                      return (
-                        <TableRow key={schedule._id}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              {schedule.film?.poster_url && (
-                                <div className="w-10 h-14 relative rounded overflow-hidden">
-                                  <Image
-                                    src={schedule.film.poster_url || "/placeholder.svg"}
-                                    alt={schedule.film_title || "Movie"}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                </div>
-                              )}
-                              <div>
-                                <div className="font-medium">
-                                  {schedule.film_title || schedule.film?.title || "N/A"}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {schedule.film?.duration ? `${schedule.film.duration} min` : ""}
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                              {schedule.ruangan}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                              {formatDateTime(schedule.tanggal, schedule.waktu)}
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">{formatPrice(schedule.harga)}</TableCell>
-                          <TableCell>
-                            <Badge variant={status.variant}>{status.label}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => handleEdit(schedule)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="outline" size="sm" onClick={() => setDeletingSchedule(schedule)}>
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle className="flex items-center gap-2">
-                                      <AlertTriangle className="h-5 w-5 text-destructive" />
-                                      Delete Schedule
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete this schedule? This action cannot be undone.
-                                      <div className="mt-3 p-3 bg-muted rounded-lg">
-                                        <p className="font-medium">{schedule.film_title || "Unknown Movie"}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                          {formatDateTime(schedule.tanggal, schedule.waktu)} • {schedule.ruangan}
-                                        </p>
-                                      </div>
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setDeletingSchedule(null)}>
-                                      Cancel
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={handleDeleteConfirm}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                      Delete Schedule
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
+                <ScheduleTable
+                  schedules={filteredSchedules}
+                  onEdit={handleEdit}
+                  onDelete={setDeletingSchedule}
+                  formatDateTime={formatDateTime}
+                  formatPrice={formatPrice}
+                  getScheduleStatus={getScheduleStatus}
+                />
               </div>
             )}
-
             {!isLoading && filteredSchedules.length === 0 && (
               <div className="text-center py-8">
                 <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -714,6 +453,13 @@ export default function AdminSchedulesPage() {
             )}
           </CardContent>
         </Card>
+        <ScheduleDeleteDialog
+          open={!!deletingSchedule}
+          schedule={deletingSchedule}
+          onCancel={() => setDeletingSchedule(null)}
+          onConfirm={handleDeleteConfirm}
+          formatDateTime={formatDateTime}
+        />
       </div>
     </AdminLayout>
   )
