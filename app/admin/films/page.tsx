@@ -5,37 +5,14 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { AdminLayout } from "@/components/templates/admin-layout"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { api } from "@/lib/api"
 import type { Film } from "@/lib/types"
-import { Plus, Edit, Trash2, Loader2, Upload, X, AlertTriangle } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import Image from "next/image"
+import { FilmDialog } from "@/components/organisms/film-dialog"
+import { FilmTable } from "@/components/organisms/film-table"
+import { FilmDeleteDialog } from "@/components/molecules/film-delete-dialog"
 
 const RATING_OPTIONS = [
   { value: "Semua Umur", label: "Semua Umur" },
@@ -359,180 +336,26 @@ export default function AdminFilmsPage() {
               <CardTitle>All Films</CardTitle>
               <CardDescription>Manage your movie database</CardDescription>
             </div>
-
-            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-              <DialogTrigger asChild>
-                <Button onClick={handleAddFilmClick}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Film
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{editingFilm ? "Edit Film" : "Add New Film"}</DialogTitle>
-                  <DialogDescription>
-                    {editingFilm ? "Update film information" : "Add a new film to the database"}
-                  </DialogDescription>
-                </DialogHeader>
-
-                <form onSubmit={handleSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Title *</Label>
-                      <Input
-                        id="title"
-                        value={formData.title}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                        placeholder="Enter movie title"
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description *</Label>
-                      <Textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                        placeholder="Enter movie description"
-                        rows={4}
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="genre">Genre *</Label>
-                        <Input
-                          id="genre"
-                          value={formData.genre}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, genre: e.target.value }))}
-                          placeholder="Drama,Family,Action"
-                          required
-                          disabled={isSubmitting}
-                        />
-                        <p className="text-xs text-muted-foreground">Separate multiple genres with commas</p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="duration">Duration (min) *</Label>
-                        <Input
-                          id="duration"
-                          type="number"
-                          min="1"
-                          value={formData.duration}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, duration: e.target.value }))}
-                          placeholder="120"
-                          required
-                          disabled={isSubmitting}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="rating">Rating *</Label>
-                        <Select
-                          value={formData.rating}
-                          onValueChange={(value) => setFormData((prev) => ({ ...prev, rating: value }))}
-                          disabled={isSubmitting}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select rating" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {RATING_OPTIONS.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="poster">Poster Image {!editingFilm && "*"}</Label>
-                      <div className="space-y-4">
-                        {/* File Input */}
-                        <div className="flex items-center gap-4">
-                          <Input
-                            id="poster"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            disabled={isSubmitting}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => document.getElementById("poster")?.click()}
-                            className="flex items-center gap-2"
-                            disabled={isSubmitting}
-                          >
-                            <Upload className="h-4 w-4" />
-                            {selectedFile ? "Change Image" : "Upload Image"}
-                          </Button>
-                          {selectedFile && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={removeSelectedFile}
-                              disabled={isSubmitting}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-
-                        {/* Image Preview */}
-                        {previewUrl && (
-                          <div className="relative w-32 h-48 border rounded-lg overflow-hidden">
-                            <Image
-                              src={previewUrl || "/placeholder.svg"}
-                              alt="Poster preview"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-
-                        {/* File Info */}
-                        {selectedFile && (
-                          <div className="text-sm text-muted-foreground">
-                            <p>Selected: {selectedFile.name}</p>
-                            <p>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                            <p>Type: {selectedFile.type}</p>
-                          </div>
-                        )}
-
-                        {!editingFilm && (
-                          <p className="text-xs text-muted-foreground">* Poster image is required for new films</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
-                      disabled={isSubmitting}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {editingFilm ? "Update Film" : "Create Film"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={handleAddFilmClick}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Film
+            </Button>
+            <FilmDialog
+              isDialogOpen={isDialogOpen}
+              handleDialogOpenChange={handleDialogOpenChange}
+              handleSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              editingFilm={editingFilm}
+              formData={formData}
+              setFormData={setFormData}
+              selectedFile={selectedFile}
+              previewUrl={previewUrl}
+              handleFileChange={handleFileChange}
+              removeSelectedFile={removeSelectedFile}
+              RATING_OPTIONS={RATING_OPTIONS}
+            />
           </div>
         </CardHeader>
-
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
@@ -540,80 +363,14 @@ export default function AdminFilmsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">No</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Genre</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead className="max-w-xs">Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {films.map((film, index) => (
-                    <TableRow key={film._id}>
-                      <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell className="font-medium">{film.title || "N/A"}</TableCell>
-                      <TableCell>{Array.isArray(film.genre) ? film.genre.join(", ") : film.genre || "N/A"}</TableCell>
-                      <TableCell>{film.duration ? `${film.duration} min` : "N/A"}</TableCell>
-                      <TableCell>{film.rating || "N/A"}</TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="truncate" title={film.description}>
-                          {truncateText(film.description)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(film)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => setDeletingFilm(film)}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="flex items-center gap-2">
-                                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                                  Delete Film
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this film? This action cannot be undone and will also
-                                  remove all associated schedules and bookings.
-                                  <div className="mt-3 p-3 bg-muted rounded-lg">
-                                    <p className="font-medium">{film.title}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      {Array.isArray(film.genre) ? film.genre.join(", ") : film.genre} • {film.duration}{" "}
-                                      min
-                                    </p>
-                                  </div>
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel onClick={() => setDeletingFilm(null)}>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleDeleteConfirm}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete Film
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <FilmTable
+                films={films}
+                onEdit={handleEdit}
+                onDelete={setDeletingFilm}
+                truncateText={truncateText}
+              />
             </div>
           )}
-
           {!isLoading && films.length === 0 && (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No films found. Add your first film to get started.</p>
@@ -621,6 +378,12 @@ export default function AdminFilmsPage() {
           )}
         </CardContent>
       </Card>
+      <FilmDeleteDialog
+        open={!!deletingFilm}
+        film={deletingFilm}
+        onCancel={() => setDeletingFilm(null)}
+        onConfirm={handleDeleteConfirm}
+      />
     </AdminLayout>
   )
 }
